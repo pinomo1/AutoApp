@@ -1,4 +1,4 @@
-using AutoApp.Application.DTOs;
+using AutoApp.Application.DTOs.Responses;
 using AutoApp.Domain.Entities;
 
 namespace AutoApp.Application.Mappings;

@@ -1,4 +1,5 @@
-using AutoApp.Application.DTOs;
+using AutoApp.Application.DTOs.Queries;
+using AutoApp.Application.DTOs.Responses;
 using AutoApp.Application.Exceptions;
 using AutoApp.Application.Mappings;
 using AutoApp.Domain.Entities;
@@ -9,7 +10,11 @@ namespace AutoApp.Application.Services;
 
 public class CarService(IAutoDbContext db) : ICarService
 {
-    public async Task<PaginatedResult<ResponseCarDto>> GetAllAsync(PaginatedQuery query, CarFilters filters, CancellationToken ct)
+    public async Task<PaginatedResult<ResponseCarDto>> GetAllAsync(
+        PaginatedQuery query,
+        CarFilters filters,
+        CarSorting sorting,
+        CancellationToken ct)
     {
         var items = db.Cars.Where(c =>
             c.Brand.Contains(filters.Brand ?? "") &&
@@ -18,6 +23,20 @@ public class CarService(IAutoDbContext db) : ICarService
         
         var totalCount = await items.CountAsync(ct);
 
+        if (sorting.SortType != null)
+        {
+            items = sorting.SortType switch
+            {
+                CarSortType.MileageAscending => items.OrderBy(c => c.Mileage),
+                CarSortType.MileageDescending => items.OrderByDescending(c => c.Mileage),
+                CarSortType.YearAscending => items.OrderBy(c => c.Year),
+                CarSortType.YearDescending => items.OrderByDescending(c => c.Year),
+                CarSortType.PriceAscending => items.OrderBy(c => c.Price),
+                CarSortType.PriceDescending => items.OrderByDescending(c => c.Price),
+                _ => items
+            };
+        }
+        
         var itemsPaginated = await items
             .Skip((query.Page - 1) * query.PageSize)
             .Take(query.PageSize)
@@ -30,13 +49,12 @@ public class CarService(IAutoDbContext db) : ICarService
     public async Task<ResponseCarDto> GetByIdAsync(Guid id, CancellationToken ct)
     {
         var car = await db.Cars.FindAsync([id], ct);
-        if (car == null) throw new NotFoundException(nameof(Car), id);
-        return car.ToDto();
+        return car == null ? throw new NotFoundException(nameof(Car), id) : car.ToDto();
     }
 
     public async Task<Guid> CreateAsync(CreateCarDto dto, CancellationToken ct)
     {
-        var car = new Car()
+        var car = new Car
         {
             Brand = dto.Brand,
             Model = dto.Model,
@@ -50,11 +68,12 @@ public class CarService(IAutoDbContext db) : ICarService
         return car.Id;
     }
 
-    public async Task UpdateAsync(UpdateCarDto dto, CancellationToken ct)
+    public async Task UpdateAsync(Guid id, UpdateCarDto dto, CancellationToken ct)
     {
-        var car = new Car()
+        if(await db.Cars.FindAsync([id], ct) == null) throw  new NotFoundException(nameof(Car), id);
+        var car = new Car
         {
-            Id = dto.Id,
+            Id = id,
             Brand = dto.Brand,
             Model = dto.Model,
             Year = dto.Year,
@@ -68,8 +87,8 @@ public class CarService(IAutoDbContext db) : ICarService
 
     public async Task DeleteAsync(Guid id, CancellationToken ct)
     {
-        var car = await GetByIdAsync(id, ct);
-        db.Cars.Remove(car.ToEntity());
+        var car = await db.Cars.FindAsync([id], ct);
+        db.Cars.Remove(car ?? throw new NotFoundException(nameof(Car), id));
         await db.SaveChangesAsync(ct);
     }
 }
