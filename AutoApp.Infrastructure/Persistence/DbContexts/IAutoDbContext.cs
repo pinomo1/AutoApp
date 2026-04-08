@@ -1,5 +1,4 @@
 using AutoApp.Domain.Entities;
-using AutoApp.Infrastructure.Persistence.Configurations;
 using Microsoft.EntityFrameworkCore;
 
 namespace AutoApp.Infrastructure.Persistence.DbContexts;

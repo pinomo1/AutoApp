@@ -9,7 +9,8 @@ public sealed class AutoDbContext : DbContext, IAutoDbContext
 {
     public AutoDbContext(DbContextOptions options) : base(options)
     {
-        Database.EnsureCreated();
+        // Database.EnsureCreated();
+        
     }
     
     public DbSet<Car> Cars { get; set; }

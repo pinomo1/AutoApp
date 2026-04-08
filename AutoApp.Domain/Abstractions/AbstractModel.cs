@@ -6,4 +6,6 @@ public abstract class AbstractModel
     /// The unique identifier for this model.
     /// </summary>
     public Guid Id { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
 }
