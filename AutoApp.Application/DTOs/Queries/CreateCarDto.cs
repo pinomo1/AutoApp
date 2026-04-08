@@ -23,8 +23,8 @@ public record CreateCarDto(
     [Required]
     [StringLength(32)]
     string Color,
-    // TODO: Range doesn't work with decimals
     [Required]
+    [Range(typeof(decimal),"0", "100000000")]
     decimal Price,
     [Required]
     [Range(0, double.MaxValue)]
