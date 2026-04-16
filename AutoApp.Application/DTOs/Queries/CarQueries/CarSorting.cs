@@ -1,12 +1,16 @@
 using System.Text.Json.Serialization;
 
-namespace AutoApp.Application.DTOs.Queries;
+namespace AutoApp.Application.DTOs.Queries.CarQueries;
 
 /// <summary>
-/// Type of sorting cars
+/// Available sorting options for car search
 /// </summary>
 public enum CarSortType
 {
+    /// <summary>
+    /// Undefined
+    /// </summary>
+    Undefined,
     /// <summary>
     /// Ascending by year
     /// </summary>
@@ -34,10 +38,16 @@ public enum CarSortType
 }
 
 /// <summary>
-/// Used to sort search results
+/// Sorting settings for car search
 /// </summary>
-/// <param name="SortType">Type of sorting</param>
-[JsonConverter(typeof(JsonStringEnumConverter))]   
+/// <param name="SortType">Selected sorting option</param>
+[JsonConverter(typeof(JsonStringEnumConverter))]
 public record CarSorting(
     CarSortType? SortType
-);
+)
+{
+    /// <summary>
+    /// Creates an empty sorting configuration
+    /// </summary>
+    public CarSorting() : this(SortType: null) {}
+}

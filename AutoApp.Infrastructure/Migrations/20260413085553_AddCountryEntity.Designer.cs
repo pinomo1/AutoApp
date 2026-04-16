@@ -4,6 +4,7 @@ using AutoApp.Infrastructure.Persistence.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AutoApp.Infrastructure.Migrations
 {
     [DbContext(typeof(AutoDbContext))]
-    partial class AutoDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260413085553_AddCountryEntity")]
+    partial class AddCountryEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -58,26 +61,13 @@ namespace AutoApp.Infrastructure.Migrations
                     b.Property<Guid>("BrandId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("CarCondition")
-                        .HasColumnType("int");
-
-                    b.Property<int>("CarType")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Color")
-                        .HasColumnType("int");
+                    b.Property<string>("Color")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
-
-                    b.Property<int>("EngineVolumeCc")
-                        .HasColumnType("int");
-
-                    b.Property<int>("FuelType")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Horsepower")
-                        .HasColumnType("int");
 
                     b.Property<double>("Mileage")
                         .HasColumnType("float");
@@ -90,9 +80,6 @@ namespace AutoApp.Infrastructure.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int>("TransmissionType")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -104,21 +91,6 @@ namespace AutoApp.Infrastructure.Migrations
                     b.HasIndex("BrandId");
 
                     b.ToTable("Cars");
-                });
-
-            modelBuilder.Entity("AutoApp.Domain.Entities.CarFeature", b =>
-                {
-                    b.Property<Guid>("CarId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("FeatureId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("CarId", "FeatureId");
-
-                    b.HasIndex("FeatureId");
-
-                    b.ToTable("CarFeature");
                 });
 
             modelBuilder.Entity("AutoApp.Domain.Entities.Country", b =>
@@ -143,28 +115,6 @@ namespace AutoApp.Infrastructure.Migrations
                     b.ToTable("Countries");
                 });
 
-            modelBuilder.Entity("AutoApp.Domain.Entities.Feature", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("FeatureName")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("nvarchar(32)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Features");
-                });
-
             modelBuilder.Entity("AutoApp.Domain.Entities.Brand", b =>
                 {
                     b.HasOne("AutoApp.Domain.Entities.Country", "Country")
@@ -187,39 +137,14 @@ namespace AutoApp.Infrastructure.Migrations
                     b.Navigation("Brand");
                 });
 
-            modelBuilder.Entity("AutoApp.Domain.Entities.CarFeature", b =>
-                {
-                    b.HasOne("AutoApp.Domain.Entities.Car", null)
-                        .WithMany("CarFeatures")
-                        .HasForeignKey("CarId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("AutoApp.Domain.Entities.Feature", null)
-                        .WithMany("CarFeatures")
-                        .HasForeignKey("FeatureId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("AutoApp.Domain.Entities.Brand", b =>
                 {
                     b.Navigation("Cars");
                 });
 
-            modelBuilder.Entity("AutoApp.Domain.Entities.Car", b =>
-                {
-                    b.Navigation("CarFeatures");
-                });
-
             modelBuilder.Entity("AutoApp.Domain.Entities.Country", b =>
                 {
                     b.Navigation("Brands");
-                });
-
-            modelBuilder.Entity("AutoApp.Domain.Entities.Feature", b =>
-                {
-                    b.Navigation("CarFeatures");
                 });
 #pragma warning restore 612, 618
         }

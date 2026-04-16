@@ -1,40 +1,37 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using AutoApp.Domain.Abstractions;
+using AutoApp.Domain.Enums;
 
 namespace AutoApp.Domain.Entities;
 
-/// <summary>
-/// This class represents a car
-/// </summary>
 public class Car : AbstractModel
 {
-    /// <summary>
-    /// The brand of teh car
-    /// </summary>
-    public string Brand { get; set; } = "";
+    public Brand Brand { get; set; } = new();
+    
+    public Guid BrandId { get; set; }
 
-    /// <summary>
-    /// The model of the car
-    /// </summary>
     public string Model { get; set; } = "";
 
-    /// <summary>
-    /// The year the car was assembled
-    /// </summary>
     public short Year { get; set; }
 
-    /// <summary>
-    /// Description of the car's color
-    /// </summary>
-    public string Color { get; set; } = "";
+    public CarCondition CarCondition { get; set; } = CarCondition.Undefined;
 
-    /// <summary>
-    /// Price the seller demands
-    /// </summary>
+    public CarType CarType { get; set; } = CarType.Undefined;
+
+    public FuelType FuelType { get; set; } = FuelType.Undefined;
+
+    public TransmissionType TransmissionType { get; set; } = TransmissionType.Undefined;
+
+    public Color Color { get; set; } = Color.Undefined;
+
+    public int Horsepower { get; set; }
+
+    public int EngineVolumeCc { get; set; }
+
     [Column(TypeName = "decimal(18,2)")]
     public decimal Price { get; set; }
-    /// <summary>
-    /// Mileage of the car
-    /// </summary>
     public double Mileage { get; set; }
+    
+    public ICollection<CarFeature> CarFeatures { get; set; } = new List<CarFeature>();
+    public ICollection<Feature> Features { get; set; } = new List<Feature>();
 }

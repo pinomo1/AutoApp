@@ -1,6 +1,7 @@
-using AutoApp.Application.DTOs.Queries;
-using AutoApp.Application.DTOs.Responses;
-using AutoApp.Application.Services;
+using AutoApp.Application.DTOs.Queries.CarQueries;
+using AutoApp.Application.DTOs.Responses.CarResponses;
+using AutoApp.Application.DTOs.Responses.SharedResponses;
+using AutoApp.Application.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AutoApp.API.Controllers;
@@ -8,76 +9,104 @@ namespace AutoApp.API.Controllers;
 /// <summary>
 /// Controller for cars
 /// </summary>
-/// <param name="carService">Service that has methods to interact with cars in database</param>
+/// <param name="carService">Car service</param>
 [ApiController]
 [Route("api/[controller]")]
 public class CarsController(ICarService carService) : ControllerBase
 {
     /// <summary>
-    /// Get the cars with pagination and filtering
+    /// Search cars by filters and pagination
     /// </summary>
-    /// <param name="query">Pagination settings</param>
-    /// <param name="filters">Filter settings</param>
-    /// <param name="sorting">Sorting settings</param>
+    /// <param name="dto">DTO: Search filters and pagination</param>
     /// <param name="ct">Cancellation token</param>
-    /// <returns>Collection of cars</returns>
+    /// <returns>Paginated cars by that search query</returns>
     [HttpGet]
-    [ProducesResponseType(typeof(PaginatedResult<ResponseCarDto>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetAll(
-        [FromQuery] PaginatedQuery query, 
-        [FromQuery] CarFilters filters,
-        [FromQuery] CarSorting sorting,
+    [ProducesResponseType(typeof(PaginatedResult<CarListItemResponseDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> Search(
+        [FromQuery] CarSearchDto dto,
         CancellationToken ct)
-        => Ok(await carService.GetAllAsync(query, filters, sorting, ct));
+        => Ok(await carService.SearchAsync(dto, ct));
 
     /// <summary>
-    /// Gets one car by its unique GUID
+    /// Get car by id
     /// </summary>
-    /// <param name="id">ID of the car</param>
+    /// <param name="id">Car GUID</param>
     /// <param name="ct">Cancellation token</param>
-    /// <returns>Car with that ID</returns>
+    /// <returns>Car or 404</returns>
     [HttpGet("{id:guid}")]
-    [ProducesResponseType(typeof(ResponseCarDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(CarDetailsResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
         => Ok(await carService.GetByIdAsync(id, ct));
 
     /// <summary>
-    /// Creates a car
+    /// Create new car
     /// </summary>
-    /// <param name="dto">Car DTO</param>
+    /// <param name="dto">DTO: Car data</param>
     /// <param name="ct">Cancellation token</param>
-    /// <returns>201 if created successfully</returns>
+    /// <returns>New ID</returns>
     [HttpPost]
-    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Create(CreateCarDto dto, CancellationToken ct)
     {
         var id = await carService.CreateAsync(dto, ct);
-        return CreatedAtAction(nameof(GetById), new { id }, null);
+        return CreatedAtAction(nameof(GetById), new { id }, id);
     }
 
     /// <summary>
-    /// Updates the car info by ID
+    /// Update existing car by ID
     /// </summary>
-    /// <param name="id">ID of the car</param>
-    /// <param name="dto">New info</param>
+    /// <param name="id">GUID of an existing car</param>
+    /// <param name="dto">DTO: New car values</param>
     /// <param name="ct">Cancellation token</param>
-    /// <returns>Nothing</returns>
+    /// <returns>200 with ID</returns>
     [HttpPut("{id:guid}")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(Guid), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Update(Guid id, UpdateCarDto dto, CancellationToken ct)
     {
         await carService.UpdateAsync(id, dto, ct);
+        return Ok(id);
+    }
+
+    /// <summary>
+    /// Adds a feature to the car
+    /// </summary>
+    /// <param name="id">GUID of the car</param>
+    /// <param name="featureId">GUID of the feature</param>
+    /// <param name="ct">Cancellation token</param>
+    /// <returns>Nothing</returns>
+    [HttpPost("{id:guid}/features/{featureId:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> AddFeature(Guid id, Guid featureId, CancellationToken ct)
+    {
+        await carService.AddFeatureAsync(id, featureId, ct);
         return NoContent();
     }
 
     /// <summary>
-    /// Deletes the car by ID
+    /// Removes a feature from the car
     /// </summary>
-    /// <param name="id">ID of the car</param>
+    /// <param name="id">GUID of the car</param>
+    /// <param name="featureId">GUID of the feature</param>
+    /// <param name="ct">Cancellation token</param>
+    /// <returns>Nothing</returns>
+    [HttpDelete("{id:guid}/features/{featureId:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> RemoveFeature(Guid id, Guid featureId, CancellationToken ct)
+    {
+        await carService.RemoveFeatureAsync(id, featureId, ct);
+        return NoContent();
+    }
+
+    /// <summary>
+    /// Deletes the car by its GUID
+    /// </summary>
+    /// <param name="id">GUID of the car</param>
     /// <param name="ct">Cancellation token</param>
     /// <returns>Nothing</returns>
     [HttpDelete("{id:guid}")]

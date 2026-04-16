@@ -4,6 +4,7 @@ using AutoApp.Infrastructure.Persistence.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AutoApp.Infrastructure.Migrations
 {
     [DbContext(typeof(AutoDbContext))]
-    partial class AutoDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260414061728_AddFeatureEntity")]
+    partial class AddFeatureEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -58,26 +61,13 @@ namespace AutoApp.Infrastructure.Migrations
                     b.Property<Guid>("BrandId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("CarCondition")
-                        .HasColumnType("int");
-
-                    b.Property<int>("CarType")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Color")
-                        .HasColumnType("int");
+                    b.Property<string>("Color")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
-
-                    b.Property<int>("EngineVolumeCc")
-                        .HasColumnType("int");
-
-                    b.Property<int>("FuelType")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Horsepower")
-                        .HasColumnType("int");
 
                     b.Property<double>("Mileage")
                         .HasColumnType("float");
@@ -89,9 +79,6 @@ namespace AutoApp.Infrastructure.Migrations
 
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("TransmissionType")
-                        .HasColumnType("int");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -154,8 +141,7 @@ namespace AutoApp.Infrastructure.Migrations
 
                     b.Property<string>("FeatureName")
                         .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("nvarchar(32)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");

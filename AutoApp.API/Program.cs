@@ -1,6 +1,7 @@
 using System.Text.Json.Serialization;
 using AutoApp.API.Extensions;
 using AutoApp.Application.Services;
+using AutoApp.Application.Services.Interfaces;
 using AutoApp.Infrastructure.Persistence.DbContexts;
 using AutoApp.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
@@ -23,7 +24,10 @@ services.AddControllers().AddJsonOptions(x =>
 });
 services.AddEndpointsApiExplorer();
 services.AddSwagger();
+services.AddScoped<ICountryService, CountryService>();
+services.AddScoped<IBrandService, BrandService>();
 services.AddScoped<ICarService, CarService>();
+services.AddScoped<IFeatureService, FeatureService>();
 services.AddScoped<IAutoDbContext, AutoDbContext>();
 services.AddExceptionHandler<AutoExceptionHandler>();
 services.AddOpenApi();
@@ -59,6 +63,9 @@ app.UseHttpsRedirection();
 app.UseExceptionHandler("/error");
 app.UseAuthorization();
 app.MapControllers();
+
+using (var scope = app.Services.CreateScope())
+using (var context = scope.ServiceProvider.GetService<AutoDbContext>())context?.Database.Migrate();
 #endregion
 
 app.Run();
