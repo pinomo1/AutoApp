@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using AutoApp.Domain.Enums;
 
 namespace AutoApp.Application.DTOs.Queries.CarQueries;
@@ -16,15 +15,15 @@ namespace AutoApp.Application.DTOs.Queries.CarQueries;
 /// <param name="Color">Color filter</param>
 /// <param name="Year">Production year filter</param>
 public record CarFilters(
-    [StringLength(256)] string? SearchString,
-    [StringLength(32)] string? BrandName,
+    string? SearchString,
+    string? BrandName,
     Guid? BrandId,
     CarCondition? CarCondition,
     CarType? CarType,
     FuelType? FuelType,
     TransmissionType? TransmissionType,
     Color? Color,
-    [Range(1800, 2026)] short? Year
+    short? Year
 )
 {
     /// <summary>

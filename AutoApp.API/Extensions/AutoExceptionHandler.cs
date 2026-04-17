@@ -1,5 +1,5 @@
-using System.ComponentModel.DataAnnotations;
 using AutoApp.Application.Exceptions;
+using FluentValidation;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
@@ -38,11 +38,13 @@ public class AutoExceptionHandler : IExceptionHandler
 
         ProblemDetails Factory()
         {
-            if (exception is ValidationException)
-            {
-                return new ValidationProblemDetails();
-            }
-            return new ProblemDetails();
+            if (exception is not ValidationException validationException) return new ProblemDetails();
+            var errors = validationException.Errors
+                .GroupBy(x => string.IsNullOrWhiteSpace(x.PropertyName) ? "request" : x.PropertyName)
+                .ToDictionary(x => x.Key, x => x.Select(e => e.ErrorMessage).Distinct().ToArray());
+
+            return new ValidationProblemDetails(errors);
+
         }
     }
 }

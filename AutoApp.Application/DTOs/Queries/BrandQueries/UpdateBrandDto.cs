@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace AutoApp.Application.DTOs.Queries.BrandQueries;
 
 /// <summary>
@@ -8,4 +6,4 @@ namespace AutoApp.Application.DTOs.Queries.BrandQueries;
 /// <param name="Id">Brand GUID</param>
 /// <param name="BrandName">New brand name</param>
 /// <param name="CountryId">New country GUID</param>
-public record UpdateBrandDto([Required] Guid Id, [Required] [StringLength(32)] string BrandName, [Required] Guid CountryId);
+public record UpdateBrandDto(Guid Id, string BrandName, Guid CountryId);

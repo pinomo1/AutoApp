@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using AutoApp.Domain.Enums;
 
 namespace AutoApp.Application.DTOs.Queries.CarQueries;
@@ -19,33 +18,16 @@ namespace AutoApp.Application.DTOs.Queries.CarQueries;
 /// <param name="Price">Listing price</param>
 /// <param name="Mileage">Vehicle mileage</param>
 public record UpdateCarDto(
-    [Required]
     Guid BrandId,
-    [Required]
-    [StringLength(32)]
     string Model,
-    [Required] 
     short Year,
-    [Required]
     CarCondition CarCondition,
-    [Required]
     CarType CarType,
-    [Required]
     FuelType FuelType,
-    [Required]
     TransmissionType TransmissionType,
-    [Required]
     Color Color,
-    [Required]
-    [Range(1, int.MaxValue)]
     int Horsepower,
-    [Required]
-    [Range(1, int.MaxValue)]
     int EngineVolumeCc,
-    [Required]
-    [Range(typeof(decimal),"0", "100000000")]
     decimal Price,
-    [Required]
-    [Range(0, double.MaxValue)]
     double Mileage
 );

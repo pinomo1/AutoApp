@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace AutoApp.Application.DTOs.Queries.FeatureQueries;
 
 /// <summary>
@@ -7,4 +5,4 @@ namespace AutoApp.Application.DTOs.Queries.FeatureQueries;
 /// </summary>
 /// <param name="Id">Feature GUID</param>
 /// <param name="FeatureName">New feature name</param>
-public record UpdateFeatureDto([Required] Guid Id, [Required] [StringLength(32)] string FeatureName);
+public record UpdateFeatureDto(Guid Id, string FeatureName);

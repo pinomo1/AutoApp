@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace AutoApp.Application.DTOs.Queries.BrandQueries;
 
 /// <summary>
@@ -7,4 +5,4 @@ namespace AutoApp.Application.DTOs.Queries.BrandQueries;
 /// </summary>
 /// <param name="BrandName">Brand name filter</param>
 /// <param name="CountryId">Country GUID filter</param>
-public record BrandSearchDto([StringLength(32)] string? BrandName,  Guid? CountryId);
+public record BrandSearchDto(string? BrandName, Guid? CountryId);

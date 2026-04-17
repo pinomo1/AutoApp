@@ -17,7 +17,9 @@ public class AutoSaveChangesInterceptor : SaveChangesInterceptor
             switch (entry.State)
             {
                 case EntityState.Added:
-                    auditable.CreatedAt = DateTime.UtcNow;
+                    var now = DateTime.UtcNow;
+                    auditable.CreatedAt = now;
+                    auditable.UpdatedAt = now;
                     break;
                 case EntityState.Modified:
                     auditable.UpdatedAt = DateTime.UtcNow;

@@ -1,5 +1,3 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace AutoApp.Application.DTOs.Queries.CountryQueries;
 
 /// <summary>
@@ -7,4 +5,4 @@ namespace AutoApp.Application.DTOs.Queries.CountryQueries;
 /// </summary>
 /// <param name="Id">Country GUID</param>
 /// <param name="CountryName">New country name</param>
-public record UpdateCountryDto([Required] Guid Id, [Required] [StringLength(32)] string CountryName);
+public record UpdateCountryDto(Guid Id, string CountryName);
