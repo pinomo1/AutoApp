@@ -2,6 +2,7 @@ using AutoApp.Application.DTOs.Queries.BrandQueries;
 using AutoApp.Application.DTOs.Responses.BrandResponses;
 using AutoApp.Application.DTOs.Responses.SharedResponses;
 using AutoApp.Application.Services.Interfaces;
+using AutoApp.API.Controllers.Requests;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AutoApp.API.Controllers;
@@ -70,6 +71,36 @@ public class BrandsController(IBrandService brandService) : ControllerBase
         await brandService.UpdateAsync(id, dto, ct);
         return Ok(id);
     }
+
+    /// <summary>
+    /// Uploads a logo/photo for a brand.
+    /// </summary>
+    /// <param name="id">GUID of an existing brand</param>
+    /// <param name="request">Multipart form payload with file field</param>
+    /// <param name="ct">Cancellation token</param>
+    /// <returns>Updated brand</returns>
+    [HttpPost("{id:guid}/logo")]
+    [ProducesResponseType(typeof(BrandResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [RequestSizeLimit(MaxLogoSizeBytes)]
+    public async Task<IActionResult> UploadLogo(Guid id, [FromForm] UploadBrandLogoRequest request, CancellationToken ct)
+    {
+        var file = request.File;
+        if (file == null || file.Length == 0)
+            return BadRequest("Logo file is required.");
+
+        var extension = Path.GetExtension(file.FileName);
+        if (string.IsNullOrWhiteSpace(extension) || !AllowedLogoExtensions.Contains(extension, StringComparer.OrdinalIgnoreCase))
+            return BadRequest($"Unsupported logo extension. Allowed extensions: {string.Join(", ", AllowedLogoExtensions)}.");
+
+        if (file.Length > MaxLogoSizeBytes)
+            return BadRequest($"Logo file is too large. Maximum allowed size is {MaxLogoSizeBytes / (1024 * 1024)} MB.");
+
+        await using var stream = file.OpenReadStream();
+        var brand = await brandService.UploadLogoAsync(id, stream, file.FileName, ct);
+        return Ok(brand);
+    }
     
     /// <summary>
     /// Deletes the brand by its GUID
@@ -85,4 +116,7 @@ public class BrandsController(IBrandService brandService) : ControllerBase
         await brandService.DeleteAsync(id, ct);
         return NoContent();
     }
+
+    private const int MaxLogoSizeBytes = 5 * 1024 * 1024;
+    private static readonly string[] AllowedLogoExtensions = [".png", ".jpg", ".jpeg", ".webp"];
 }

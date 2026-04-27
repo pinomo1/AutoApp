@@ -44,6 +44,16 @@ public interface IBrandService
     Task UpdateAsync(Guid id, UpdateBrandDto dto, CancellationToken ct);
 
     /// <summary>
+    /// Uploads a brand logo and stores its resulting location on the brand.
+    /// </summary>
+    /// <param name="id">Brand GUID</param>
+    /// <param name="content">File content stream</param>
+    /// <param name="fileName">Original file name</param>
+    /// <param name="ct">Cancellation token</param>
+    /// <returns>Updated brand response DTO</returns>
+    Task<BrandResponseDto> UploadLogoAsync(Guid id, Stream content, string fileName, CancellationToken ct);
+
+    /// <summary>
     /// Deletes a brand by identifier
     /// </summary>
     /// <param name="id">Brand GUID</param>

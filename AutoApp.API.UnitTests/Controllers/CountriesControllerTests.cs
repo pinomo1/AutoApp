@@ -16,7 +16,7 @@ public class CountriesControllerTests
         var service = new Mock<ICountryService>();
         var dto = new CountrySearchDto("Ja");
         var result = new CountedResult<CountryResponseDto>(
-            new List<CountryResponseDto> { new(Guid.NewGuid(), "Japan") },
+            new List<CountryResponseDto> { new(Guid.NewGuid(), "Japan", "JP") },
             1);
 
         service.Setup(s => s.SearchAsync(dto, It.IsAny<CancellationToken>())).ReturnsAsync(result);
@@ -33,7 +33,7 @@ public class CountriesControllerTests
     public async Task Create_WhenCalled_ShouldReturnCreatedAtActionWithId()
     {
         var service = new Mock<ICountryService>();
-        var dto = new CreateCountryDto("Japan");
+        var dto = new CreateCountryDto("Japan", "JP");
         var id = Guid.NewGuid();
 
         service.Setup(s => s.CreateAsync(dto, It.IsAny<CancellationToken>())).ReturnsAsync(id);

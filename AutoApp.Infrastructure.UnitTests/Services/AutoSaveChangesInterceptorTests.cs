@@ -11,7 +11,7 @@ public class AutoSaveChangesInterceptorTests
     public void SaveChanges_WhenEntityIsAdded_ShouldSetCreatedAt()
     {
         using var dbContext = CreateDbContext(new AutoSaveChangesInterceptor());
-        var country = new Country { CountryName = "Japan" };
+        var country = new Country { CountryName = "Japan", CountryCode = "JP" };
 
         dbContext.Countries.Add(country);
         dbContext.SaveChanges();
@@ -28,7 +28,7 @@ public class AutoSaveChangesInterceptorTests
     public void SaveChanges_WhenEntityIsModified_ShouldSetUpdatedAt()
     {
         using var dbContext = CreateDbContext(new AutoSaveChangesInterceptor());
-        var country = new Country { CountryName = "Germany" };
+        var country = new Country { CountryName = "Germany", CountryCode = "DE" };
 
         dbContext.Countries.Add(country);
         dbContext.SaveChanges();

@@ -7,4 +7,5 @@ namespace AutoApp.Application.DTOs.Responses.BrandResponses;
 /// <param name="BrandName">Brand name</param>
 /// <param name="CountryId">Country GUID</param>
 /// <param name="CountryName">Country name</param>
-public record BrandResponseDto(Guid Id, string BrandName, Guid CountryId, string CountryName);
+/// <param name="LogoUrl">Brand logo/photo URL or storage path</param>
+public record BrandResponseDto(Guid Id, string BrandName, Guid CountryId, string CountryName, string? LogoUrl = null);

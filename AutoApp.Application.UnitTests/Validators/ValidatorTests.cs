@@ -23,6 +23,21 @@ public class ValidatorTests
         });
     }
 
+            [Test]
+            public void CreateBrandDtoValidator_WhenLogoUrlTooLong_ShouldFail()
+            {
+                var validator = new CreateBrandDtoValidator();
+                var dto = new CreateBrandDto("BMW", Guid.NewGuid(), new string('a', 257));
+
+                var result = validator.Validate(dto);
+
+                Assert.Multiple(() =>
+                {
+                    Assert.That(result.IsValid, Is.False);
+                    Assert.That(result.Errors.Any(x => x.PropertyName == nameof(CreateBrandDto.LogoUrl)), Is.True);
+                });
+            }
+
     [Test]
     public void PaginatedQueryValidator_WhenPageSizeOutOfRange_ShouldFail()
     {

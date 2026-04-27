@@ -3,7 +3,7 @@ namespace AutoApp.Application.DTOs.Queries.BrandQueries;
 /// <summary>
 /// Request to update an existing brand
 /// </summary>
-/// <param name="Id">Brand GUID</param>
 /// <param name="BrandName">New brand name</param>
 /// <param name="CountryId">New country GUID</param>
-public record UpdateBrandDto(Guid Id, string BrandName, Guid CountryId);
+/// <param name="LogoUrl">Optional brand logo/photo URL or storage path</param>
+public record UpdateBrandDto(string BrandName, Guid CountryId, string? LogoUrl = null);

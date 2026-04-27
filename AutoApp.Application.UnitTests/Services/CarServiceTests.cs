@@ -23,7 +23,7 @@ public class CarServiceTests
     public async Task GetByIdAsync_WhenCarExists_ShouldReturnMappedDto()
     {
         await using var dbContext = TestDbContextFactory.Create();
-        var country = new Country { Id = Guid.NewGuid(), CountryName = "Japan" };
+        var country = new Country { Id = Guid.NewGuid(), CountryName = "Japan", CountryCode = "JP" };
         var brand = new Brand { Id = Guid.NewGuid(), BrandName = "Toyota", CountryId = country.Id, Country = country };
         var feature = new Feature { Id = Guid.NewGuid(), FeatureName = "Sunroof" };
         var car = new Car

@@ -47,6 +47,9 @@ public static class StartupExtension
             services.AddEndpointsApiExplorer();
             services.AddSwagger();
             services.AddAppServices();
+            services.AddOptions<BrandLogoStorageOptions>()
+                .Bind(config.GetSection(BrandLogoStorageOptions.SectionName))
+                .ValidateDataAnnotations();
             services.AddExceptionHandler<AutoExceptionHandler>();
             services.AddOpenApi();
             services.AddHealthChecks();
@@ -139,6 +142,7 @@ public static class StartupExtension
             services.AddScoped<ICarService, CarService>();
             services.AddScoped<IFeatureService, FeatureService>();
             services.AddScoped<IAutoDbContext, AutoDbContext>();
+            services.AddScoped<IBrandLogoStorage, SftpBrandLogoStorage>();
         }
     }
 }

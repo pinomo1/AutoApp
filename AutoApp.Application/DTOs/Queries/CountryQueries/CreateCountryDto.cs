@@ -4,4 +4,5 @@ namespace AutoApp.Application.DTOs.Queries.CountryQueries;
 /// Request to create a country
 /// </summary>
 /// <param name="CountryName">Country name</param>
-public record CreateCountryDto(string CountryName);
+/// <param name="CountryCode">Country code</param>
+public record CreateCountryDto(string CountryName, string CountryCode);

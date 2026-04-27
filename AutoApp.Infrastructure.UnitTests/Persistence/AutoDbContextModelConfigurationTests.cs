@@ -63,6 +63,24 @@ public class AutoDbContextModelConfigurationTests
         Assert.That(brandCountryForeignKey.PrincipalEntityType.ClrType, Is.EqualTo(typeof(Country)));
     }
 
+    [Test]
+    public void Model_WhenConfigured_ShouldApplyCountryCodeLengthAndType()
+    {
+        using var dbContext = CreateDbContext();
+        var entityType = dbContext.Model.FindEntityType(typeof(Country));
+
+        Assert.That(entityType, Is.Not.Null);
+
+        var codeProperty = entityType!.FindProperty(nameof(Country.CountryCode));
+
+        Assert.That(codeProperty, Is.Not.Null);
+        Assert.Multiple(() =>
+        {
+            Assert.That(codeProperty!.GetMaxLength(), Is.EqualTo(2));
+            Assert.That(codeProperty.IsNullable, Is.False);
+        });
+    }
+
     private static AutoDbContext CreateDbContext()
     {
         var options = new DbContextOptionsBuilder<AutoDbContext>()

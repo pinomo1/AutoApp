@@ -17,9 +17,6 @@ public class UpdateFeatureDtoValidator : AbstractValidator<UpdateFeatureDto>
 {
     public UpdateFeatureDtoValidator()
     {
-        RuleFor(x => x.Id)
-            .NotEmpty();
-
         RuleFor(x => x.FeatureName)
             .NotEmpty()
             .MaximumLength(32);

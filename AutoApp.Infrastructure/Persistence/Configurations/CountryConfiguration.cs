@@ -9,5 +9,6 @@ public class CountryConfiguration : AbstractConfiguration<Country>
     {
         base.Configure(builder);
         builder.Property(c => c.CountryName).HasMaxNVarChar(32).IsRequired();
+        builder.Property(c => c.CountryCode).HasMaxNVarChar(2).IsRequired();
     }
 }

@@ -15,7 +15,7 @@ public static class CountryMapping
         /// Maps a country entity to a response DTO
         /// </summary>
         /// <returns>Country response DTO</returns>
-        public CountryResponseDto ToDto() => new(country.Id, country.CountryName);
+        public CountryResponseDto ToDto() => new(country.Id, country.CountryName, country.CountryCode);
     }
 
     extension(CreateCountryDto dto)
@@ -27,7 +27,8 @@ public static class CountryMapping
         public Country ToEntity() => new()
         {
             Id = Guid.Empty,
-            CountryName = dto.CountryName.Trim()
+            CountryName = dto.CountryName.Trim(),
+            CountryCode = dto.CountryCode.Trim().ToUpperInvariant()
         };
     }
 
@@ -41,7 +42,8 @@ public static class CountryMapping
         public Country ToEntity(Guid id) => new()
         {
             Id = id,
-            CountryName = dto.CountryName.Trim()
+            CountryName = dto.CountryName.Trim(),
+            CountryCode = dto.CountryCode.Trim().ToUpperInvariant()
         };
     }
 }

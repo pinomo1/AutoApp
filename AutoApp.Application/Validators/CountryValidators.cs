@@ -10,6 +10,10 @@ public class CreateCountryDtoValidator : AbstractValidator<CreateCountryDto>
         RuleFor(x => x.CountryName)
             .NotEmpty()
             .MaximumLength(32);
+
+        RuleFor(x => x.CountryCode)
+            .NotEmpty()
+            .Length(2);
     }
 }
 
@@ -17,12 +21,13 @@ public class UpdateCountryDtoValidator : AbstractValidator<UpdateCountryDto>
 {
     public UpdateCountryDtoValidator()
     {
-        RuleFor(x => x.Id)
-            .NotEmpty();
-
         RuleFor(x => x.CountryName)
             .NotEmpty()
             .MaximumLength(32);
+
+        RuleFor(x => x.CountryCode)
+            .NotEmpty()
+            .Length(2);
     }
 }
 

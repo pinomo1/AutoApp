@@ -6,6 +6,7 @@ using AutoApp.Application.Mappings;
 using AutoApp.Application.Services.Interfaces;
 using AutoApp.Domain.Entities;
 using AutoApp.Infrastructure.Persistence.DbContexts;
+using AutoApp.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
@@ -15,7 +16,8 @@ namespace AutoApp.Application.Services;
 /// Service for brand CRUD operations and search
 /// </summary>
 /// <param name="db">Database context abstraction</param>
-public class BrandService(IAutoDbContext db) : IBrandService
+/// <param name="brandLogoStorage">Brand logo storage abstraction</param>
+public class BrandService(IAutoDbContext db, IBrandLogoStorage brandLogoStorage) : IBrandService
 {
     private const string CaseInsensitiveCollation = "SQL_Latin1_General_CP1_CI_AS";
     
@@ -100,6 +102,28 @@ public class BrandService(IAutoDbContext db) : IBrandService
         
         country.Brands.Add(brand);
         await db.SaveChangesAsync(ct);
+    }
+
+    /// <summary>
+    /// Uploads a brand logo and saves the resulting storage path/URL on the brand.
+    /// </summary>
+    /// <param name="id">Brand GUID</param>
+    /// <param name="content">File content stream</param>
+    /// <param name="fileName">Original file name</param>
+    /// <param name="ct">Cancellation token</param>
+    /// <returns>Updated brand response DTO</returns>
+    /// <exception cref="NotFoundException">Thrown when the brand does not exist.</exception>
+    public async Task<BrandResponseDto> UploadLogoAsync(Guid id, Stream content, string fileName, CancellationToken ct)
+    {
+        var brand = await db.Brands.Include(b => b.Country).FirstOrDefaultAsync(b => b.Id == id, ct);
+        if (brand == null)
+            throw new NotFoundException(nameof(Brand), id);
+
+        var logoUrl = await brandLogoStorage.UploadAsync(id, content, fileName, ct);
+        brand.LogoUrl = logoUrl;
+        await db.SaveChangesAsync(ct);
+
+        return brand.ToDto();
     }
 
     /// <summary>
