@@ -1,0 +1,32 @@
+services:
+  sql:
+    image: mcr.microsoft.com/mssql/server:2025-latest
+    ports:
+      - "1433:1433"
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "SampleText1337228$"
+    volumes:
+      - mssql_data:/var/opt/mssql
+
+  sftp:
+    image: atmoz/sftp:alpine
+    ports:
+      - "22:22"
+    volumes:
+      - sftp-data:/home/colemak
+    command: colemak:SampleText1337228$:::upload
+
+  web:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - sftp-data:/usr/share/nginx/html:ro
+    environment:
+      - NGINX_HOST=localhost
+      - NGINX_PORT=80
+
+volumes:
+  sftp-data:
+  mssql_data:

@@ -18,7 +18,7 @@ public class BrandLogoStorageOptions
     [Required]
     public string Password { get; set; } = "";
 
-    public string RemoteDirectory { get; set; } = "/uploads/brands";
+    public string RemoteDirectory { get; set; } = "/upload";
 
     // Optional: when set, responses store a public URL instead of raw remote path.
     public string? PublicBaseUrl { get; set; }

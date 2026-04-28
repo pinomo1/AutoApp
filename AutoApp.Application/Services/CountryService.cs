@@ -18,7 +18,7 @@ namespace AutoApp.Application.Services;
 public class CountryService(IAutoDbContext db) : ICountryService
 {
     private const string CaseInsensitiveCollation = "SQL_Latin1_General_CP1_CI_AS";
-    
+
     /// <summary>
     /// Searches countries by optional name filter
     /// </summary>
@@ -32,14 +32,15 @@ public class CountryService(IAutoDbContext db) : ICountryService
         if (!name.IsNullOrEmpty())
         {
             items = items.Where(c =>
-                EF.Functions.Like(EF.Functions.Collate(c.CountryName, CaseInsensitiveCollation), $"%{name}%"));
+                EF.Functions.Like(EF.Functions.Collate(c.CountryName, CaseInsensitiveCollation), $"%{name}%") ||
+                EF.Functions.Like(EF.Functions.Collate(c.CountryCode, CaseInsensitiveCollation), $"%{name}%"));
         }
-        
+
         var totalCount = await items.CountAsync(ct);
         items = items.OrderBy(c => c.CountryName);
 
         var itemsDto = await items.Select(c => c.ToDto()).ToListAsync(ct);
-        
+
         return new CountedResult<CountryResponseDto>(itemsDto, totalCount);
     }
 

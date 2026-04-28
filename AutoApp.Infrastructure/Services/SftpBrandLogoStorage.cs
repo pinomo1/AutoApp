@@ -49,7 +49,7 @@ public class SftpBrandLogoStorage(IOptions<BrandLogoStorageOptions> options) : I
     private static string NormalizeDirectory(string? remoteDirectory)
     {
         if (string.IsNullOrWhiteSpace(remoteDirectory))
-            return "/uploads/brands";
+            return "/upload";
 
         var normalized = remoteDirectory.Trim().Replace('\\', '/').TrimEnd('/');
         return normalized.StartsWith('/') ? normalized : "/" + normalized;
