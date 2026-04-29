@@ -52,13 +52,15 @@ public class CarMappingTests
             Mileage = 12.5
         };
 
-        var dto = car.ToListItemDto();
+        var mainPhotoUrl = "http://example.com/photo.jpg";
+        var dto = car.ToListItemDto(mainPhotoUrl);
 
         Assert.Multiple(() =>
         {
             Assert.That(dto.BrandName, Is.EqualTo("Honda"));
             Assert.That(dto.Color, Is.EqualTo("Blue"));
             Assert.That(dto.Model, Is.EqualTo("Civic"));
+            Assert.That(dto.MainPhotoUrl, Is.EqualTo(mainPhotoUrl));
         });
     }
 }

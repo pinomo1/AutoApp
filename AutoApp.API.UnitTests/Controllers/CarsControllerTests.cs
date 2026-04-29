@@ -19,7 +19,7 @@ public class CarsControllerTests
         var result = new PaginatedResult<CarListItemResponseDto>(
             new List<CarListItemResponseDto>
             {
-                new(Guid.NewGuid(), "Toyota", "Camry", 2020, "Black", 180, 2500, 20000m, 50000)
+                new(Guid.NewGuid(), "Toyota", "Camry", 2020, "Black", 180, 2500, 20000m, 50000, "http://example.com/photo.jpg")
             },
             1,
             20,

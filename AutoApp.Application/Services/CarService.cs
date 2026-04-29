@@ -30,21 +30,24 @@ public class CarService(IAutoDbContext db) : ICarService
         CancellationToken ct)
     {
         var items = db.Cars.AsNoTracking().Include(c => c.Brand)
-            .ThenInclude(b => b.Country).AsQueryable();
+            .ThenInclude(b => b.Country).Include(c => c.CarPhotos).AsQueryable();
         items = ApplyBaseFilters(items, dto.Filters);
         items = ApplySearchWords(items, dto.Filters.SearchString);
-        
+
         var totalCount = await items.CountAsync(ct);
-        
+
         items = ApplySorting(items, dto.Sorting);
-        
+
         var itemsPaginated = await items
             .Skip((dto.Query.Page - 1) * dto.Query.PageSize)
             .Take(dto.Query.PageSize)
-            .Select(c => c.ToListItemDto())
             .ToListAsync(ct);
 
-        return new PaginatedResult<CarListItemResponseDto>(itemsPaginated, dto.Query.Page, dto.Query.PageSize, totalCount);
+        return new PaginatedResult<CarListItemResponseDto>(
+            itemsPaginated.Select(c => c.ToListItemDto(c.CarPhotos.FirstOrDefault(p => p.IsMainPhoto)?.PhotoUrl ?? string.Empty)).ToList(),
+            dto.Query.Page,
+            dto.Query.PageSize,
+            totalCount);
     }
 
     /// <summary>
@@ -59,7 +62,7 @@ public class CarService(IAutoDbContext db) : ICarService
         {
             items = items.Where(c => c.BrandId == filters.BrandId);
         }
-        
+
         if (!string.IsNullOrWhiteSpace(filters.BrandName))
         {
             var brand = filters.BrandName.Trim();
@@ -83,7 +86,7 @@ public class CarService(IAutoDbContext db) : ICarService
             items = items.Where(c => c.Color == filters.Color.Value);
 
         if (!filters.Year.HasValue) return items;
-        
+
         var year = filters.Year.Value;
         items = items.Where(c => c.Year == year);
 
@@ -116,7 +119,7 @@ public class CarService(IAutoDbContext db) : ICarService
             var hasFuelType = Enum.TryParse<FuelType>(word, true, out var fuelTypeTerm);
             var hasTransmissionType = Enum.TryParse<TransmissionType>(word, true, out var transmissionTypeTerm);
             var hasColor = Enum.TryParse<Color>(word, true, out var colorTerm);
-            
+
             items = items.Where(c =>
                 EF.Functions.Like(EF.Functions.Collate(c.Brand.BrandName, CaseInsensitiveCollation), pattern) ||
                 EF.Functions.Like(EF.Functions.Collate(c.Model, CaseInsensitiveCollation), pattern) ||
@@ -155,7 +158,7 @@ public class CarService(IAutoDbContext db) : ICarService
             _ => items.OrderByDescending(c => c.Id)
         };
     }
-    
+
     /// <summary>
     /// Gets a car by identifier
     /// </summary>
@@ -181,7 +184,7 @@ public class CarService(IAutoDbContext db) : ICarService
         var brand = db.Brands.FirstOrDefault(b => b.Id == dto.BrandId);
         if (brand == null)
             throw new NotFoundException(nameof(Brand), dto.BrandId);
-        
+
         var car = dto.ToEntity();
         brand.Cars.Add(car);
         await db.SaveChangesAsync(ct);
@@ -197,17 +200,15 @@ public class CarService(IAutoDbContext db) : ICarService
     /// <exception cref="NotFoundException">Thrown when the car or related brand does not exist.</exception>
     public async Task UpdateAsync(Guid id, UpdateCarDto dto, CancellationToken ct)
     {
-        if(!await db.Cars.AnyAsync(c => c.Id == id, ct)) 
-            throw  new NotFoundException(nameof(Car), id);
-        var car = dto.ToEntity(id);
-        db.Cars.Attach(car);
-        
+        if(!await db.Cars.AnyAsync(c => c.Id == id, ct))
+            throw new NotFoundException(nameof(Car), id);
+
         var brand = db.Brands.FirstOrDefault(b => b.Id == dto.BrandId);
         if (brand == null)
             throw new NotFoundException(nameof(Brand), dto.BrandId);
-        db.Brands.Attach(brand);
-        
-        brand.Cars.Add(car);
+
+        var car = dto.ToEntity(id);
+        db.Cars.Update(car);
         await db.SaveChangesAsync(ct);
     }
 

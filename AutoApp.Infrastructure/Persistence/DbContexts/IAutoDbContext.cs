@@ -10,5 +10,6 @@ public interface IAutoDbContext
     public DbSet<Country> Countries { get; set; }
     public DbSet<Feature> Features { get; set; }
     public DbSet<CarFeature> CarFeature { get; set; }
+    public DbSet<CarPhoto> CarPhotos { get; set; }
     Task<int> SaveChangesAsync(CancellationToken ct);
 }

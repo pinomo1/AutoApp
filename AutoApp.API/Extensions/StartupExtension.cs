@@ -50,6 +50,9 @@ public static class StartupExtension
             services.AddOptions<BrandLogoStorageOptions>()
                 .Bind(config.GetSection(BrandLogoStorageOptions.SectionName))
                 .ValidateDataAnnotations();
+            services.AddOptions<CarPhotoStorageOptions>()
+                .Bind(config.GetSection(CarPhotoStorageOptions.SectionName))
+                .ValidateDataAnnotations();
             services.AddExceptionHandler<AutoExceptionHandler>();
             services.AddOpenApi();
             services.AddHealthChecks();
@@ -131,7 +134,7 @@ public static class StartupExtension
                 xmlFiles.ForEach(xmlFile => c.IncludeXmlComments(xmlFile));
             });
         }
-        
+
         /// <summary>
         /// Add application services to the services
         /// </summary>
@@ -140,9 +143,11 @@ public static class StartupExtension
             services.AddScoped<ICountryService, CountryService>();
             services.AddScoped<IBrandService, BrandService>();
             services.AddScoped<ICarService, CarService>();
+            services.AddScoped<ICarPhotoService, CarPhotoService>();
             services.AddScoped<IFeatureService, FeatureService>();
             services.AddScoped<IAutoDbContext, AutoDbContext>();
             services.AddScoped<IBrandLogoStorage, SftpBrandLogoStorage>();
+            services.AddScoped<ICarPhotoStorage, SftpCarPhotoStorage>();
         }
     }
 }

@@ -7,7 +7,7 @@ namespace AutoApp.Domain.Entities;
 public class Car : AbstractModel
 {
     public Brand Brand { get; set; } = new();
-    
+
     public Guid BrandId { get; set; }
 
     public string Model { get; set; } = "";
@@ -31,7 +31,8 @@ public class Car : AbstractModel
     [Column(TypeName = "decimal(18,2)")]
     public decimal Price { get; set; }
     public double Mileage { get; set; }
-    
+
     public ICollection<CarFeature> CarFeatures { get; set; } = new List<CarFeature>();
     public ICollection<Feature> Features { get; set; } = new List<Feature>();
+    public ICollection<CarPhoto> CarPhotos { get; set; } = new List<CarPhoto>();
 }

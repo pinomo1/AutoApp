@@ -12,6 +12,7 @@ namespace AutoApp.Application.DTOs.Responses.CarResponses;
 /// <param name="EngineVolumeCc">Engine displacement in cubic centimeters (cc)</param>
 /// <param name="Price">Listing price</param>
 /// <param name="Mileage">Vehicle mileage</param>
+/// <param name="MainPhotoUrl">Main photo URL or storage path</param>
 public record CarListItemResponseDto(
 	Guid Id,
 	string BrandName,
@@ -21,4 +22,5 @@ public record CarListItemResponseDto(
 	int Horsepower,
 	int EngineVolumeCc,
 	decimal Price,
-	double Mileage);
+	double Mileage,
+	string MainPhotoUrl);

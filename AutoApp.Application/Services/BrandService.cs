@@ -20,7 +20,7 @@ namespace AutoApp.Application.Services;
 public class BrandService(IAutoDbContext db, IBrandLogoStorage brandLogoStorage) : IBrandService
 {
     private const string CaseInsensitiveCollation = "SQL_Latin1_General_CP1_CI_AS";
-    
+
     /// <summary>
     /// Searches brands by optional name and country filters
     /// </summary>
@@ -46,7 +46,7 @@ public class BrandService(IAutoDbContext db, IBrandLogoStorage brandLogoStorage)
         items = items.OrderBy(b => b.BrandName);
 
         var itemsDto = await items.Select(b => b.ToDto()).ToListAsync(ct);
-        
+
         return new CountedResult<BrandResponseDto>(itemsDto, totalCount);
     }
 
@@ -74,7 +74,7 @@ public class BrandService(IAutoDbContext db, IBrandLogoStorage brandLogoStorage)
         var country = db.Countries.FirstOrDefault(c => c.Id == dto.CountryId);
         if (country == null)
             throw new NotFoundException(nameof(Country), dto.CountryId);
-        
+
         var brand = dto.ToEntity();
         country.Brands.Add(brand);
         await db.SaveChangesAsync(ct);
@@ -92,15 +92,13 @@ public class BrandService(IAutoDbContext db, IBrandLogoStorage brandLogoStorage)
     {
         if(!await db.Brands.AnyAsync(b => b.Id == id, ct))
             throw new NotFoundException(nameof(Brand), id);
-        var brand = dto.ToEntity(id);
-        db.Brands.Attach(brand);
-        
+
         var country = db.Countries.FirstOrDefault(c => c.Id == dto.CountryId);
         if (country == null)
             throw new NotFoundException(nameof(Country), dto.CountryId);
-        db.Countries.Attach(country);
-        
-        country.Brands.Add(brand);
+
+        var brand = dto.ToEntity(id);
+        db.Brands.Update(brand);
         await db.SaveChangesAsync(ct);
     }
 

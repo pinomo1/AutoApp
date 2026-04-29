@@ -23,8 +23,8 @@ public static class CarMapping
         /// Maps a car entity to a list item response DTO
         /// </summary>
         /// <returns>Car list item response DTO</returns>
-        public CarListItemResponseDto ToListItemDto() => new(car.Id, car.Brand.BrandName, car.Model, car.Year,
-            car.Color.ToString(), car.Horsepower, car.EngineVolumeCc, car.Price, car.Mileage);
+        public CarListItemResponseDto ToListItemDto(string mainPhotoUrl) => new(car.Id, car.Brand.BrandName, car.Model, car.Year,
+            car.Color.ToString(), car.Horsepower, car.EngineVolumeCc, car.Price, car.Mileage, mainPhotoUrl);
     }
 
     extension(CreateCarDto dto)

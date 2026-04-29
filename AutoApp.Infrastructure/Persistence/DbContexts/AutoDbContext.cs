@@ -12,7 +12,8 @@ public sealed class AutoDbContext(DbContextOptions options) : DbContext(options)
     public DbSet<Country> Countries { get; set; }
     public DbSet<Feature> Features { get; set; }
     public DbSet<CarFeature> CarFeature { get; set; }
-    
+    public DbSet<CarPhoto> CarPhotos { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -21,6 +22,7 @@ public sealed class AutoDbContext(DbContextOptions options) : DbContext(options)
         modelBuilder.ApplyConfiguration(new CountryConfiguration());
         modelBuilder.ApplyConfiguration(new FeatureConfiguration());
         modelBuilder.ApplyConfiguration(new CarFeatureConfiguration());
+        modelBuilder.ApplyConfiguration(new CarPhotoConfiguration());
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
     }
 }
