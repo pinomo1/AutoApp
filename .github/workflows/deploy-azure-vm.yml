@@ -1,0 +1,47 @@
+﻿name: Deploy AutoApp to Azure VM
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Sync files to Azure VM
+        uses: burnett01/rsync-deployments@7.0.3
+        with:
+          switches: -avzr --delete --exclude='.git' --exclude='.github' --exclude='**/bin' --exclude='**/obj' --exclude='logs'
+          path: ./
+          remote_path: ${{ secrets.AZURE_VM_APP_DIR }}
+          remote_host: ${{ secrets.AZURE_VM_HOST }}
+          remote_user: ${{ secrets.AZURE_VM_USER }}
+          remote_key: ${{ secrets.AZURE_VM_SSH_KEY }}
+          remote_port: ${{ secrets.AZURE_VM_SSH_PORT || 22 }}
+
+      - name: Build and restart containers on the VM
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.AZURE_VM_HOST }}
+          username: ${{ secrets.AZURE_VM_USER }}
+          key: ${{ secrets.AZURE_VM_SSH_KEY }}
+          port: ${{ secrets.AZURE_VM_SSH_PORT || 22 }}
+          script_stop: true
+          script: |
+            set -e
+            cd "${{ secrets.AZURE_VM_APP_DIR }}"
+
+            cat > .env <<'EOF'
+            MSSQL_SA_PASSWORD=${{ secrets.MSSQL_SA_PASSWORD }}
+            SFTP_PASSWORD=${{ secrets.SFTP_PASSWORD }}
+            JWT_SIGNING_KEY=${{ secrets.JWT_SIGNING_KEY }}
+            IDENTITY_ADMIN_EMAIL=${{ secrets.IDENTITY_ADMIN_EMAIL }}
+            IDENTITY_ADMIN_PASSWORD=${{ secrets.IDENTITY_ADMIN_PASSWORD }}
+            EOF
+
+            docker compose up -d --build --remove-orphans
