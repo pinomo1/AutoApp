@@ -1,10 +1,13 @@
 using AutoApp.API.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.AddSerilogLogging();
+
 builder.AddApiServices();
 
 var app = builder.Build();
 app.UseApiPipeline();
-app.ApplyDatabaseMigrations();
+await app.ApplyDatabaseMigrationsAsync();
 
 app.Run();

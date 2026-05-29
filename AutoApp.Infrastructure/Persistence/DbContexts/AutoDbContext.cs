@@ -1,11 +1,14 @@
 using System.Reflection;
 using AutoApp.Domain.Entities;
+using AutoApp.Infrastructure.Identity;
 using AutoApp.Infrastructure.Persistence.Configurations;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace AutoApp.Infrastructure.Persistence.DbContexts;
 
-public sealed class AutoDbContext(DbContextOptions options) : DbContext(options), IAutoDbContext
+public sealed class AutoDbContext(DbContextOptions<AutoDbContext> options) : IdentityDbContext<ApplicationUser, IdentityRole<Guid>, Guid>(options), IAutoDbContext
 {
     public DbSet<Car> Cars { get; set; }
     public DbSet<Brand> Brands { get; set; }
