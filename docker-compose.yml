@@ -11,7 +11,20 @@ services:
       - mssql_data:/var/opt/mssql
     healthcheck:
       # Use -C to trust the server certificate (sqlcmd/ODBC driver 18 verifies certs by default)
-      test: ["CMD", "/opt/mssql-tools18/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "${MSSQL_SA_PASSWORD}", "-C", "-Q", "SELECT 1"]
+      test:
+        [
+          "CMD",
+          "/opt/mssql-tools18/bin/sqlcmd",
+          "-S",
+          "localhost",
+          "-U",
+          "sa",
+          "-P",
+          "${MSSQL_SA_PASSWORD}",
+          "-C",
+          "-Q",
+          "SELECT 1",
+        ]
       interval: 10s
       timeout: 5s
       retries: 15
@@ -56,8 +69,8 @@ services:
       SharedFtpStorage__Username: colemak
       SharedFtpStorage__Password: ${SFTP_PASSWORD}
       SharedFtpStorage__RemoteDirectory: /upload
-      SharedFtpStorage__PublicBaseUrl: "http://localhost/upload"
-      # SharedFtpStorage__PublicBaseUrl: "http://20.215.254.104/upload"
+      # SharedFtpStorage__PublicBaseUrl: "http://localhost/upload"
+      SharedFtpStorage__PublicBaseUrl: "http://20.215.254.104/upload"
     depends_on:
       sql:
         condition: service_healthy

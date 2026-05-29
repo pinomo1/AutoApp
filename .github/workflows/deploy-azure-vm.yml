@@ -32,7 +32,6 @@ jobs:
           username: ${{ secrets.AZURE_VM_USER }}
           key: ${{ secrets.AZURE_VM_SSH_KEY }}
           port: ${{ secrets.AZURE_VM_SSH_PORT || 22 }}
-          script_stop: true
           script: |
             set -e
             cd "${{ secrets.AZURE_VM_APP_DIR }}"
