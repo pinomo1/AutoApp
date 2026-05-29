@@ -1,21 +1,67 @@
 services:
   sql:
     image: mcr.microsoft.com/mssql/server:2025-latest
+    container_name: autoapp-sql
     ports:
       - "1433:1433"
     environment:
       ACCEPT_EULA: "Y"
-      MSSQL_SA_PASSWORD: "SampleText1337228$"
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD}
     volumes:
       - mssql_data:/var/opt/mssql
+    healthcheck:
+      # Use -C to trust the server certificate (sqlcmd/ODBC driver 18 verifies certs by default)
+      test: ["CMD", "/opt/mssql-tools18/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "${MSSQL_SA_PASSWORD}", "-C", "-Q", "SELECT 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 60s
 
   sftp:
     image: atmoz/sftp:alpine
+    container_name: autoapp-sftp
     ports:
-      - "22:22"
+      - "52222:22"
     volumes:
       - sftp-data:/home/colemak
-    command: colemak:SampleText1337228$:::upload
+    command: colemak:${SFTP_PASSWORD}:::upload
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: autoapp-api
+    volumes:
+      - ./logs:/app/logs
+    ports:
+      - "8081:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:8080
+      Jwt__Issuer: AutoApp
+      Jwt__Audience: AutoApp
+      Jwt__SigningKey: ${JWT_SIGNING_KEY}
+      Jwt__ExpiresMinutes: 120
+      Identity__SeedAdmin__Enabled: "true"
+      Identity__SeedAdmin__Role: Admin
+      Identity__SeedAdmin__UserName: admin
+      Identity__SeedAdmin__Email: ${IDENTITY_ADMIN_EMAIL}
+      Identity__SeedAdmin__Password: ${IDENTITY_ADMIN_PASSWORD}
+      # Database connection (service name 'sql' resolves via Docker DNS)
+      ConnectionStrings__ResourcesHost: "Server=sql;Database=AutoApp;User Id=sa;Password=${MSSQL_SA_PASSWORD};TrustServerCertificate=True"
+      # Storage configuration (SFTP by default)
+      SharedFtpStorage__Protocol: Sftp
+      SharedFtpStorage__Host: sftp
+      SharedFtpStorage__Port: 52222
+      SharedFtpStorage__Username: colemak
+      SharedFtpStorage__Password: ${SFTP_PASSWORD}
+      SharedFtpStorage__RemoteDirectory: /upload
+      SharedFtpStorage__PublicBaseUrl: "http://localhost/upload"
+      # SharedFtpStorage__PublicBaseUrl: "http://20.215.254.104/upload"
+    depends_on:
+      sql:
+        condition: service_healthy
+    restart: unless-stopped
 
   web:
     image: nginx:alpine
