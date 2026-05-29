@@ -9,7 +9,12 @@ public static class ConfigurationExtension
     {
         public PropertyBuilder HasMaxNVarChar(int maxLength)
         {
-            return builder.HasMaxLength(maxLength).HasColumnType("nvarchar(" + maxLength + ")").IsRequired();
+            return builder.HasMaxNVarCharOpt(maxLength).IsRequired();
+        }
+
+        public PropertyBuilder HasMaxNVarCharOpt(int maxLength)
+        {
+            return builder.HasMaxLength(maxLength).HasColumnType("nvarchar(" + maxLength + ")");
         }
     }
 }

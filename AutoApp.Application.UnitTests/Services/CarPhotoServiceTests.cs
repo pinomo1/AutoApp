@@ -1,4 +1,5 @@
 using AutoApp.Application.Exceptions;
+using AutoApp.Application.DTOs.Queries.CarPhotoQueries;
 using AutoApp.Application.Services;
 using AutoApp.Application.UnitTests.Common;
 using AutoApp.Domain.Entities;
@@ -101,7 +102,7 @@ public class CarPhotoServiceTests
 
         var service = new CarPhotoService(dbContext, StubStorage);
         await using var content = new MemoryStream([1, 2, 3]);
-        var photoId = await service.CreateAsync(car.Id, content, "photo.jpg", 1, true, CancellationToken.None);
+        var photoId = await service.CreateAsync(new CreateCarPhotoUploadDto(car.Id, content, "photo.jpg", 1, true), CancellationToken.None);
 
         var createdPhoto = await dbContext.CarPhotos.FirstOrDefaultAsync(p => p.Id == photoId);
         Assert.That(createdPhoto, Is.Not.Null);
@@ -119,9 +120,12 @@ public class CarPhotoServiceTests
     {
         using var dbContext = TestDbContextFactory.Create();
         var service = new CarPhotoService(dbContext, StubStorage);
-        using var content = new MemoryStream([1, 2]);
 
-        Assert.ThrowsAsync<NotFoundException>(() => service.CreateAsync(Guid.NewGuid(), content, "photo.jpg", 0, true, CancellationToken.None));
+        Assert.ThrowsAsync<NotFoundException>(async () =>
+        {
+            using var content = new MemoryStream([1, 2]);
+            await service.CreateAsync(new CreateCarPhotoUploadDto(Guid.NewGuid(), content, "photo.jpg"), CancellationToken.None);
+        });
     }
 
     [Test]
@@ -143,7 +147,7 @@ public class CarPhotoServiceTests
 
         var service = new CarPhotoService(dbContext, StubStorage);
         await using var content = new MemoryStream([4, 5, 6]);
-        await service.UpdateAsync(car.Id, photo.Id, content, "updated.jpg", 2, true, CancellationToken.None);
+        await service.UpdateAsync(new UpdateCarPhotoUploadDto(car.Id, photo.Id, content, "updated.jpg", 2, true), CancellationToken.None);
 
         var updatedPhoto = await dbContext.CarPhotos.FirstOrDefaultAsync(p => p.Id == photo.Id);
         Assert.That(updatedPhoto, Is.Not.Null);
@@ -161,9 +165,12 @@ public class CarPhotoServiceTests
     {
         using var dbContext = TestDbContextFactory.Create();
         var service = new CarPhotoService(dbContext, StubStorage);
-        using var content = new MemoryStream([1, 2]);
 
-        Assert.ThrowsAsync<NotFoundException>(() => service.UpdateAsync(Guid.NewGuid(), Guid.NewGuid(), content, "photo.jpg", 0, true, CancellationToken.None));
+        Assert.ThrowsAsync<NotFoundException>(async () =>
+        {
+            using var content = new MemoryStream([1, 2]);
+            await service.UpdateAsync(new UpdateCarPhotoUploadDto(Guid.NewGuid(), Guid.NewGuid(), content, "photo.jpg"), CancellationToken.None);
+        });
     }
 
     [Test]

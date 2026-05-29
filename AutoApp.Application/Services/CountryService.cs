@@ -7,7 +7,6 @@ using AutoApp.Application.Services.Interfaces;
 using AutoApp.Domain.Entities;
 using AutoApp.Infrastructure.Persistence.DbContexts;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 
 namespace AutoApp.Application.Services;
 
@@ -29,7 +28,7 @@ public class CountryService(IAutoDbContext db) : ICountryService
     {
         var items = db.Countries.AsNoTracking().AsQueryable();
         var name = dto.CountryName?.Trim();
-        if (!name.IsNullOrEmpty())
+        if (!string.IsNullOrWhiteSpace(name))
         {
             items = items.Where(c =>
                 EF.Functions.Like(EF.Functions.Collate(c.CountryName, CaseInsensitiveCollation), $"%{name}%") ||

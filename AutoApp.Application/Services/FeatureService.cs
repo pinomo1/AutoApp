@@ -7,7 +7,6 @@ using AutoApp.Application.Services.Interfaces;
 using AutoApp.Domain.Entities;
 using AutoApp.Infrastructure.Persistence.DbContexts;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 
 namespace AutoApp.Application.Services;
 
@@ -18,7 +17,7 @@ namespace AutoApp.Application.Services;
 public class FeatureService(IAutoDbContext db) : IFeatureService
 {
     private const string CaseInsensitiveCollation = "SQL_Latin1_General_CP1_CI_AS";
-    
+
     /// <summary>
     /// Searches features by optional name filter
     /// </summary>
@@ -29,17 +28,17 @@ public class FeatureService(IAutoDbContext db) : IFeatureService
     {
         var items = db.Features.AsNoTracking().AsQueryable();
         var name = dto.FeatureName?.Trim();
-        if (!name.IsNullOrEmpty())
+        if (!string.IsNullOrWhiteSpace(name))
         {
             items = items.Where(c =>
                 EF.Functions.Like(EF.Functions.Collate(c.FeatureName, CaseInsensitiveCollation), $"%{name}%"));
         }
-        
+
         var totalCount = await items.CountAsync(ct);
         items = items.OrderBy(c => c.FeatureName);
 
         var itemsDto = await items.Select(c => c.ToDto()).ToListAsync(ct);
-        
+
         return new CountedResult<FeatureResponseDto>(itemsDto, totalCount);
     }
 

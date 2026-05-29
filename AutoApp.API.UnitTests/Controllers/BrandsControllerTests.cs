@@ -36,7 +36,7 @@ public class BrandsControllerTests
     {
         var service = new Mock<IBrandService>();
         var id = Guid.NewGuid();
-        var dto = new UpdateBrandDto("Toyota", Guid.NewGuid(), "https://cdn.example.com/toyota.png");
+        var dto = new UpdateBrandDto("Toyota", Guid.NewGuid());
         var controller = new BrandsController(service.Object);
 
         var actionResult = await controller.Update(id, dto, CancellationToken.None);
@@ -57,7 +57,7 @@ public class BrandsControllerTests
         var file = new FormFile(fileStream, 0, fileStream.Length, "file", "toyota.png");
         var request = new UploadBrandLogoRequest { File = file };
 
-        service.Setup(s => s.UploadLogoAsync(id, It.IsAny<Stream>(), "toyota.png", It.IsAny<CancellationToken>()))
+        service.Setup(s => s.UploadLogoAsync(It.Is<UploadBrandLogoDto>(dto => dto.BrandId == id && dto.FileName == "toyota.png"), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expected);
         var controller = new BrandsController(service.Object);
 
@@ -65,8 +65,8 @@ public class BrandsControllerTests
 
         var ok = actionResult as OkObjectResult;
         Assert.That(ok, Is.Not.Null);
-        Assert.That(ok!.Value, Is.EqualTo(expected));
-        service.Verify(s => s.UploadLogoAsync(id, It.IsAny<Stream>(), "toyota.png", It.IsAny<CancellationToken>()), Times.Once);
+        Assert.That(ok!.Value, Is.EqualTo(new IdResponse(id)));
+        service.Verify(s => s.UploadLogoAsync(It.Is<UploadBrandLogoDto>(dto => dto.BrandId == id && dto.FileName == "toyota.png"), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Test]
@@ -80,7 +80,7 @@ public class BrandsControllerTests
         var actionResult = await controller.UploadLogo(Guid.NewGuid(), new UploadBrandLogoRequest { File = file }, CancellationToken.None);
 
         Assert.That(actionResult, Is.TypeOf<BadRequestObjectResult>());
-        service.Verify(s => s.UploadLogoAsync(It.IsAny<Guid>(), It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+        service.Verify(s => s.UploadLogoAsync(It.IsAny<UploadBrandLogoDto>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Test]
@@ -92,14 +92,14 @@ public class BrandsControllerTests
         await using var fileStream = new MemoryStream([1, 2, 3]);
         var file = new FormFile(fileStream, 0, fileStream.Length, "file", "toyota.PNG");
 
-        service.Setup(s => s.UploadLogoAsync(id, It.IsAny<Stream>(), "toyota.PNG", It.IsAny<CancellationToken>()))
+        service.Setup(s => s.UploadLogoAsync(It.Is<UploadBrandLogoDto>(dto => dto.BrandId == id && dto.FileName == "toyota.PNG"), It.IsAny<CancellationToken>()))
             .ReturnsAsync(expected);
         var controller = new BrandsController(service.Object);
 
         var actionResult = await controller.UploadLogo(id, new UploadBrandLogoRequest { File = file }, CancellationToken.None);
 
         Assert.That(actionResult, Is.TypeOf<OkObjectResult>());
-        service.Verify(s => s.UploadLogoAsync(id, It.IsAny<Stream>(), "toyota.PNG", It.IsAny<CancellationToken>()), Times.Once);
+        service.Verify(s => s.UploadLogoAsync(It.Is<UploadBrandLogoDto>(dto => dto.BrandId == id && dto.FileName == "toyota.PNG"), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Test]
@@ -111,6 +111,6 @@ public class BrandsControllerTests
         var actionResult = await controller.UploadLogo(Guid.NewGuid(), new UploadBrandLogoRequest { File = null }, CancellationToken.None);
 
         Assert.That(actionResult, Is.TypeOf<BadRequestObjectResult>());
-        service.Verify(s => s.UploadLogoAsync(It.IsAny<Guid>(), It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<CancellationToken>()), Times.Never);
+        service.Verify(s => s.UploadLogoAsync(It.IsAny<UploadBrandLogoDto>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 }

@@ -21,7 +21,7 @@ public class BrandServiceTests
         await dbContext.SaveChangesAsync(CancellationToken.None);
 
         var service = new BrandService(dbContext, StubStorage);
-        var id = await service.CreateAsync(new CreateBrandDto("  BMW  ", country.Id, "  https://cdn.example.com/bmw.png  "), CancellationToken.None);
+        var id = await service.CreateAsync(new CreateBrandDto("  BMW  ", country.Id), CancellationToken.None);
 
         var brand = await dbContext.Brands.SingleAsync(b => b.Id == id);
         Assert.Multiple(() =>
@@ -95,7 +95,7 @@ public class BrandServiceTests
         var service = new BrandService(dbContext, new StubBrandLogoStorage(storedUrl));
         await using var content = new MemoryStream([1, 2, 3, 4]);
 
-        var dto = await service.UploadLogoAsync(brand.Id, content, "bmw.png", CancellationToken.None);
+        var dto = await service.UploadLogoAsync(new UploadBrandLogoDto(brand.Id, content, "bmw.png"), CancellationToken.None);
 
         var updated = await dbContext.Brands.SingleAsync(b => b.Id == brand.Id);
         Assert.Multiple(() =>
@@ -110,10 +110,12 @@ public class BrandServiceTests
     {
         using var dbContext = TestDbContextFactory.Create();
         var service = new BrandService(dbContext, StubStorage);
-        using var content = new MemoryStream([1, 2]);
 
-        Assert.ThrowsAsync<NotFoundException>(() =>
-            service.UploadLogoAsync(Guid.NewGuid(), content, "unknown.png", CancellationToken.None));
+        Assert.ThrowsAsync<NotFoundException>(async () =>
+        {
+            using var content = new MemoryStream([1, 2]);
+            await service.UploadLogoAsync(new UploadBrandLogoDto(Guid.NewGuid(), content, "unknown.png"), CancellationToken.None);
+        });
     }
 
     private sealed class StubBrandLogoStorage(string logoUrl) : IBrandLogoStorage

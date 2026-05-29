@@ -1,4 +1,5 @@
 using AutoApp.Application.DTOs.Responses.CarPhotoResponses;
+using AutoApp.Application.DTOs.Queries.CarPhotoQueries;
 using AutoApp.Application.Exceptions;
 using AutoApp.Application.Mappings;
 using AutoApp.Application.Services.Interfaces;
@@ -49,30 +50,30 @@ public class CarPhotoService(IAutoDbContext db, ICarPhotoStorage carPhotoStorage
     /// <summary>
     /// Creates a new car photo
     /// </summary>
-    public async Task<Guid> CreateAsync(Guid carId, Stream content, string fileName, int displayOrder, bool isMainPhoto, CancellationToken ct)
+    public async Task<Guid> CreateAsync(CreateCarPhotoUploadDto dto, CancellationToken ct)
     {
-        var car = await db.Cars.FirstOrDefaultAsync(c => c.Id == carId, ct);
+        var car = await db.Cars.FirstOrDefaultAsync(c => c.Id == dto.CarId, ct);
         if (car == null)
-            throw new NotFoundException(nameof(Car), carId);
+            throw new NotFoundException(nameof(Car), dto.CarId);
 
         var photoId = Guid.NewGuid();
-        var photoUrl = await carPhotoStorage.UploadAsync(photoId, content, fileName, ct);
+        var photoUrl = await carPhotoStorage.UploadAsync(photoId, dto.Content, dto.FileName, ct);
 
         var photo = new CarPhoto
         {
             Id = photoId,
-            CarId = carId,
+            CarId = dto.CarId,
             Car = car,
             PhotoUrl = photoUrl.Trim(),
-            DisplayOrder = displayOrder,
-            IsMainPhoto = isMainPhoto
+            DisplayOrder = dto.DisplayOrder,
+            IsMainPhoto = dto.IsMainPhoto
         };
 
         // If this is the main photo, unset main photo flag on other photos
         if (photo.IsMainPhoto)
         {
             var existingPhotos = await db.CarPhotos
-                .Where(p => p.CarId == carId && p.IsMainPhoto)
+                .Where(p => p.CarId == dto.CarId && p.IsMainPhoto)
                 .ToListAsync(ct);
 
             foreach (var existingPhoto in existingPhotos)
@@ -89,17 +90,17 @@ public class CarPhotoService(IAutoDbContext db, ICarPhotoStorage carPhotoStorage
     /// <summary>
     /// Updates an existing car photo
     /// </summary>
-    public async Task UpdateAsync(Guid carId, Guid id, Stream content, string fileName, int displayOrder, bool isMainPhoto, CancellationToken ct)
+    public async Task UpdateAsync(UpdateCarPhotoUploadDto dto, CancellationToken ct)
     {
-        var existingPhoto = await db.CarPhotos.FirstOrDefaultAsync(p => p.Id == id && p.CarId == carId, ct);
+        var existingPhoto = await db.CarPhotos.FirstOrDefaultAsync(p => p.Id == dto.Id && p.CarId == dto.CarId, ct);
         if (existingPhoto == null)
-            throw new NotFoundException(nameof(CarPhoto), id);
+            throw new NotFoundException(nameof(CarPhoto), dto.Id);
 
         // If this is the main photo, unset main photo flag on other photos
-        if (isMainPhoto && !existingPhoto.IsMainPhoto)
+        if (dto.IsMainPhoto && !existingPhoto.IsMainPhoto)
         {
             var mainPhotos = await db.CarPhotos
-                .Where(p => p.CarId == existingPhoto.CarId && p.IsMainPhoto && p.Id != id)
+                .Where(p => p.CarId == existingPhoto.CarId && p.IsMainPhoto && p.Id != dto.Id)
                 .ToListAsync(ct);
 
             foreach (var mainPhoto in mainPhotos)
@@ -108,11 +109,11 @@ public class CarPhotoService(IAutoDbContext db, ICarPhotoStorage carPhotoStorage
             }
         }
 
-        var photoUrl = await carPhotoStorage.UploadAsync(id, content, fileName, ct);
+        var photoUrl = await carPhotoStorage.UploadAsync(dto.Id, dto.Content, dto.FileName, ct);
 
         existingPhoto.PhotoUrl = photoUrl.Trim();
-        existingPhoto.DisplayOrder = displayOrder;
-        existingPhoto.IsMainPhoto = isMainPhoto;
+        existingPhoto.DisplayOrder = dto.DisplayOrder;
+        existingPhoto.IsMainPhoto = dto.IsMainPhoto;
 
         await db.SaveChangesAsync(ct);
     }

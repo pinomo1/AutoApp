@@ -4,7 +4,12 @@ namespace AutoApp.Infrastructure.Services;
 
 public class CarPhotoStorageOptions
 {
-    public const string SectionName = "CarPhotoStorage";
+    public const string SectionName = "SharedFtpStorage";
+
+    /// <summary>
+    /// Storage protocol to use (Sftp, Ftp, or Ftps).
+    /// </summary>
+    public StorageProtocol Protocol { get; set; } = StorageProtocol.Sftp;
 
     [Required]
     public string Host { get; set; } = "localhost";

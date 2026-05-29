@@ -8,7 +8,6 @@ using AutoApp.Domain.Entities;
 using AutoApp.Infrastructure.Persistence.DbContexts;
 using AutoApp.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 
 namespace AutoApp.Application.Services;
 
@@ -31,7 +30,7 @@ public class BrandService(IAutoDbContext db, IBrandLogoStorage brandLogoStorage)
     {
         var items = db.Brands.AsNoTracking().Include(b => b.Country).AsQueryable();
         var name = dto.BrandName?.Trim();
-        if (!name.IsNullOrEmpty())
+        if (!string.IsNullOrWhiteSpace(name))
         {
             items = items.Where(b =>
                 EF.Functions.Like(EF.Functions.Collate(b.BrandName, CaseInsensitiveCollation), $"%{name}%"));
@@ -90,34 +89,34 @@ public class BrandService(IAutoDbContext db, IBrandLogoStorage brandLogoStorage)
     /// <exception cref="NotFoundException">Thrown when the brand or related country does not exist.</exception>
     public async Task UpdateAsync(Guid id, UpdateBrandDto dto, CancellationToken ct)
     {
-        if(!await db.Brands.AnyAsync(b => b.Id == id, ct))
+        var brand = await db.Brands.FirstOrDefaultAsync(b => b.Id == id, ct);
+        if (brand == null)
             throw new NotFoundException(nameof(Brand), id);
 
         var country = db.Countries.FirstOrDefault(c => c.Id == dto.CountryId);
         if (country == null)
             throw new NotFoundException(nameof(Country), dto.CountryId);
 
-        var brand = dto.ToEntity(id);
-        db.Brands.Update(brand);
+        brand.BrandName = dto.BrandName;
+        brand.CountryId = dto.CountryId;
+
         await db.SaveChangesAsync(ct);
     }
 
     /// <summary>
     /// Uploads a brand logo and saves the resulting storage path/URL on the brand.
     /// </summary>
-    /// <param name="id">Brand GUID</param>
-    /// <param name="content">File content stream</param>
-    /// <param name="fileName">Original file name</param>
+    /// <param name="dto">Upload request DTO</param>
     /// <param name="ct">Cancellation token</param>
     /// <returns>Updated brand response DTO</returns>
     /// <exception cref="NotFoundException">Thrown when the brand does not exist.</exception>
-    public async Task<BrandResponseDto> UploadLogoAsync(Guid id, Stream content, string fileName, CancellationToken ct)
+    public async Task<BrandResponseDto> UploadLogoAsync(UploadBrandLogoDto dto, CancellationToken ct)
     {
-        var brand = await db.Brands.Include(b => b.Country).FirstOrDefaultAsync(b => b.Id == id, ct);
+        var brand = await db.Brands.Include(b => b.Country).FirstOrDefaultAsync(b => b.Id == dto.BrandId, ct);
         if (brand == null)
-            throw new NotFoundException(nameof(Brand), id);
+            throw new NotFoundException(nameof(Brand), dto.BrandId);
 
-        var logoUrl = await brandLogoStorage.UploadAsync(id, content, fileName, ct);
+        var logoUrl = await brandLogoStorage.UploadAsync(dto.BrandId, dto.Content, dto.FileName, ct);
         brand.LogoUrl = logoUrl;
         await db.SaveChangesAsync(ct);
 

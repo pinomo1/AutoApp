@@ -13,10 +13,6 @@ public class CreateBrandDtoValidator : AbstractValidator<CreateBrandDto>
 
         RuleFor(x => x.CountryId)
             .NotEmpty();
-
-        RuleFor(x => x.LogoUrl)
-            .MaximumLength(256)
-            .When(x => !string.IsNullOrWhiteSpace(x.LogoUrl));
     }
 }
 
@@ -30,10 +26,6 @@ public class UpdateBrandDtoValidator : AbstractValidator<UpdateBrandDto>
 
         RuleFor(x => x.CountryId)
             .NotEmpty();
-
-        RuleFor(x => x.LogoUrl)
-            .MaximumLength(256)
-            .When(x => !string.IsNullOrWhiteSpace(x.LogoUrl));
     }
 }
 

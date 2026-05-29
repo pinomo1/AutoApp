@@ -46,12 +46,12 @@ public class FeaturesController(IFeatureService featureService) : ControllerBase
     /// <param name="ct">Cancellation token</param>
     /// <returns>New ID</returns>
     [HttpPost]
-    [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(IdResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Create(CreateFeatureDto dto, CancellationToken ct)
     {
         var id = await featureService.CreateAsync(dto, ct);
-        return CreatedAtAction(nameof(GetById), new { id }, id);
+        return CreatedAtAction(nameof(GetById), new { id }, new IdResponse(id));
     }
 
     /// <summary>
@@ -62,13 +62,13 @@ public class FeaturesController(IFeatureService featureService) : ControllerBase
     /// <param name="ct">Cancellation token</param>
     /// <returns>200 with ID</returns>
     [HttpPut("{id:guid}")]
-    [ProducesResponseType(typeof(Guid), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IdResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Update(Guid id, UpdateFeatureDto dto, CancellationToken ct)
     {
         await featureService.UpdateAsync(id, dto, ct);
-        return Ok(id);
+        return Ok(new IdResponse(id));
     }
 
     /// <summary>

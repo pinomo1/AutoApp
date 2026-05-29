@@ -38,12 +38,7 @@ public class SftpCarPhotoStorage(IOptions<CarPhotoStorageOptions> options) : ICa
         client.Disconnect();
 
         var publicBaseUrl = _options.PublicBaseUrl?.Trim().TrimEnd('/');
-        if (!string.IsNullOrWhiteSpace(publicBaseUrl))
-        {
-            return Task.FromResult($"{publicBaseUrl}/{fileName}");
-        }
-
-        return Task.FromResult(remotePath);
+        return Task.FromResult(!string.IsNullOrWhiteSpace(publicBaseUrl) ? $"{publicBaseUrl}/{fileName}" : remotePath);
     }
 
     private static string NormalizeDirectory(string? remoteDirectory)

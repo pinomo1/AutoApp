@@ -1,4 +1,5 @@
 using AutoApp.Application.DTOs.Responses.CarPhotoResponses;
+using AutoApp.Application.DTOs.Queries.CarPhotoQueries;
 
 namespace AutoApp.Application.Services.Interfaces;
 
@@ -26,26 +27,17 @@ public interface ICarPhotoService
     /// <summary>
     /// Creates a new car photo
     /// </summary>
-    /// <param name="carId">Car GUID</param>
-    /// <param name="content">Uploaded file stream</param>
-    /// <param name="fileName">Original file name</param>
-    /// <param name="displayOrder">Display order index</param>
-    /// <param name="isMainPhoto">Whether this is the main photo</param>
+    /// <param name="dto">Upload request DTO</param>
     /// <param name="ct">Cancellation token</param>
     /// <returns>Created car photo GUID</returns>
-    Task<Guid> CreateAsync(Guid carId, Stream content, string fileName, int displayOrder, bool isMainPhoto, CancellationToken ct);
+    Task<Guid> CreateAsync(CreateCarPhotoUploadDto dto, CancellationToken ct);
 
     /// <summary>
     /// Updates an existing car photo
     /// </summary>
-    /// <param name="id">Car photo GUID</param>
-    /// <param name="carId">Car GUID</param>
-    /// <param name="content">Uploaded file stream</param>
-    /// <param name="fileName">Original file name</param>
-    /// <param name="displayOrder">Display order index</param>
-    /// <param name="isMainPhoto">Whether this is the main photo</param>
+    /// <param name="dto">Upload request DTO</param>
     /// <param name="ct">Cancellation token</param>
-    Task UpdateAsync(Guid carId, Guid id, Stream content, string fileName, int displayOrder, bool isMainPhoto, CancellationToken ct);
+    Task UpdateAsync(UpdateCarPhotoUploadDto dto, CancellationToken ct);
 
     /// <summary>
     /// Deletes a car photo by identifier

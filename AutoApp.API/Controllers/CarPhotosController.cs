@@ -1,4 +1,6 @@
 using AutoApp.Application.DTOs.Responses.CarPhotoResponses;
+using AutoApp.Application.DTOs.Responses.SharedResponses;
+using AutoApp.Application.DTOs.Queries.CarPhotoQueries;
 using AutoApp.API.Controllers.Requests;
 using AutoApp.Application.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -47,7 +49,7 @@ public class CarPhotosController(ICarPhotoService carPhotoService) : ControllerB
     /// <returns>New photo ID</returns>
     [HttpPost]
     [Consumes("multipart/form-data")]
-    [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(IdResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Create(Guid carId, [FromForm] UploadCarPhotoRequest request, CancellationToken ct)
@@ -64,8 +66,9 @@ public class CarPhotosController(ICarPhotoService carPhotoService) : ControllerB
             return BadRequest($"Photo file is too large. Maximum allowed size is {MaxPhotoSizeBytes / (1024 * 1024)} MB.");
 
         await using var stream = file.OpenReadStream();
-        var id = await carPhotoService.CreateAsync(carId, stream, file.FileName, request.DisplayOrder, request.IsMainPhoto, ct);
-        return CreatedAtAction(nameof(GetById), new { carId, id }, id);
+        var dto = new CreateCarPhotoUploadDto(carId, stream, file.FileName, request.DisplayOrder, request.IsMainPhoto);
+        var id = await carPhotoService.CreateAsync(dto, ct);
+        return CreatedAtAction(nameof(GetById), new { carId, id }, new IdResponse(id));
     }
 
     /// <summary>
@@ -78,7 +81,7 @@ public class CarPhotosController(ICarPhotoService carPhotoService) : ControllerB
     /// <returns>200 with ID</returns>
     [HttpPut("{id:guid}")]
     [Consumes("multipart/form-data")]
-    [ProducesResponseType(typeof(Guid), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IdResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Update(Guid carId, Guid id, [FromForm] UploadCarPhotoRequest request, CancellationToken ct)
@@ -95,8 +98,9 @@ public class CarPhotosController(ICarPhotoService carPhotoService) : ControllerB
             return BadRequest($"Photo file is too large. Maximum allowed size is {MaxPhotoSizeBytes / (1024 * 1024)} MB.");
 
         await using var stream = file.OpenReadStream();
-        await carPhotoService.UpdateAsync(carId, id, stream, file.FileName, request.DisplayOrder, request.IsMainPhoto, ct);
-        return Ok(id);
+        var dto = new UpdateCarPhotoUploadDto(carId, id, stream, file.FileName, request.DisplayOrder, request.IsMainPhoto);
+        await carPhotoService.UpdateAsync(dto, ct);
+        return Ok(new IdResponse(id));
     }
 
     /// <summary>

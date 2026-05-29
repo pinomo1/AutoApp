@@ -27,7 +27,7 @@ public class BrandsController(IBrandService brandService) : ControllerBase
         [FromQuery] BrandSearchDto dto,
         CancellationToken ct)
         => Ok(await brandService.SearchAsync(dto, ct));
-    
+
     /// <summary>
     /// Get brand by id
     /// </summary>
@@ -35,11 +35,11 @@ public class BrandsController(IBrandService brandService) : ControllerBase
     /// <param name="ct">Cancellation token</param>
     /// <returns>Country or 404</returns>
     [HttpGet("{id:guid}")]
-    [ProducesResponseType(typeof(BrandResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IdResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetById(Guid id, CancellationToken ct)
         => Ok(await brandService.GetByIdAsync(id, ct));
-    
+
     /// <summary>
     /// Create new brand by name and country
     /// </summary>
@@ -47,14 +47,14 @@ public class BrandsController(IBrandService brandService) : ControllerBase
     /// <param name="ct"></param>
     /// <returns>New ID</returns>
     [HttpPost]
-    [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(IdResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Create(CreateBrandDto dto, CancellationToken ct)
     {
         var id = await brandService.CreateAsync(dto, ct);
-        return CreatedAtAction(nameof(GetById), new { id }, id);
+        return CreatedAtAction(nameof(GetById), new { id }, new IdResponse(id));
     }
-    
+
     /// <summary>
     /// Update existing brand by ID with new name and/or country
     /// </summary>
@@ -63,13 +63,13 @@ public class BrandsController(IBrandService brandService) : ControllerBase
     /// <param name="ct">Cancellation token</param>
     /// <returns>200 with ID</returns>
     [HttpPut("{id:guid}")]
-    [ProducesResponseType(typeof(Guid), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IdResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Update(Guid id, UpdateBrandDto dto, CancellationToken ct)
     {
         await brandService.UpdateAsync(id, dto, ct);
-        return Ok(id);
+        return Ok(new IdResponse(id));
     }
 
     /// <summary>
@@ -78,9 +78,9 @@ public class BrandsController(IBrandService brandService) : ControllerBase
     /// <param name="id">GUID of an existing brand</param>
     /// <param name="request">Multipart form payload with file field</param>
     /// <param name="ct">Cancellation token</param>
-    /// <returns>Updated brand</returns>
+    /// <returns>Brand ID</returns>
     [HttpPost("{id:guid}/logo")]
-    [ProducesResponseType(typeof(BrandResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(IdResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [RequestSizeLimit(MaxLogoSizeBytes)]
@@ -98,10 +98,11 @@ public class BrandsController(IBrandService brandService) : ControllerBase
             return BadRequest($"Logo file is too large. Maximum allowed size is {MaxLogoSizeBytes / (1024 * 1024)} MB.");
 
         await using var stream = file.OpenReadStream();
-        var brand = await brandService.UploadLogoAsync(id, stream, file.FileName, ct);
-        return Ok(brand);
+        var dto = new UploadBrandLogoDto(id, stream, file.FileName);
+        await brandService.UploadLogoAsync(dto, ct);
+        return Ok(new IdResponse(id));
     }
-    
+
     /// <summary>
     /// Deletes the brand by its GUID
     /// </summary>

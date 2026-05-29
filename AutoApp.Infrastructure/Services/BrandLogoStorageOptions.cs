@@ -4,7 +4,12 @@ namespace AutoApp.Infrastructure.Services;
 
 public class BrandLogoStorageOptions
 {
-    public const string SectionName = "BrandLogoStorage";
+    public const string SectionName = "SharedFtpStorage";
+
+    /// <summary>
+    /// Storage protocol to use (Sftp, Ftp, or Ftps).
+    /// </summary>
+    public StorageProtocol Protocol { get; set; } = StorageProtocol.Sftp;
 
     [Required]
     public string Host { get; set; } = "localhost";
@@ -20,6 +25,5 @@ public class BrandLogoStorageOptions
 
     public string RemoteDirectory { get; set; } = "/upload";
 
-    // Optional: when set, responses store a public URL instead of raw remote path.
     public string? PublicBaseUrl { get; set; }
 }

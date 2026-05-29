@@ -1,6 +1,8 @@
 using AutoApp.API.Controllers;
 using AutoApp.API.Controllers.Requests;
+using AutoApp.Application.DTOs.Queries.CarPhotoQueries;
 using AutoApp.Application.DTOs.Responses.CarPhotoResponses;
+using AutoApp.Application.DTOs.Responses.SharedResponses;
 using AutoApp.Application.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -69,7 +71,7 @@ public class CarPhotosControllerTests
         var photoId = Guid.NewGuid();
         var request = new UploadCarPhotoRequest { File = CreateFile("photo.jpg"), DisplayOrder = 0, IsMainPhoto = true };
 
-        service.Setup(s => s.CreateAsync(carId, It.IsAny<Stream>(), "photo.jpg", 0, true, It.IsAny<CancellationToken>())).ReturnsAsync(photoId);
+        service.Setup(s => s.CreateAsync(It.Is<CreateCarPhotoUploadDto>(dto => dto.CarId == carId && dto.FileName == "photo.jpg"), It.IsAny<CancellationToken>())).ReturnsAsync(photoId);
         var controller = new CarPhotosController(service.Object);
 
         var actionResult = await controller.Create(carId, request, CancellationToken.None);
@@ -79,9 +81,9 @@ public class CarPhotosControllerTests
         Assert.Multiple(() =>
         {
             Assert.That(createdResult!.ActionName, Is.EqualTo(nameof(CarPhotosController.GetById)));
-            Assert.That(createdResult.Value, Is.EqualTo(photoId));
+            Assert.That(createdResult.Value, Is.EqualTo(new IdResponse(photoId)));
         });
-        service.Verify(s => s.CreateAsync(carId, It.IsAny<Stream>(), "photo.jpg", 0, true, It.IsAny<CancellationToken>()), Times.Once);
+        service.Verify(s => s.CreateAsync(It.Is<CreateCarPhotoUploadDto>(dto => dto.CarId == carId && dto.FileName == "photo.jpg"), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Test]
@@ -108,7 +110,7 @@ public class CarPhotosControllerTests
         var actionResult = await controller.Create(Guid.NewGuid(), new UploadCarPhotoRequest { File = null, DisplayOrder = 0, IsMainPhoto = true }, CancellationToken.None);
 
         Assert.That(actionResult, Is.TypeOf<BadRequestObjectResult>());
-        service.Verify(s => s.CreateAsync(It.IsAny<Guid>(), It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()), Times.Never);
+        service.Verify(s => s.CreateAsync(It.IsAny<CreateCarPhotoUploadDto>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Test]
@@ -119,7 +121,7 @@ public class CarPhotosControllerTests
         var photoId = Guid.NewGuid();
         var request = new UploadCarPhotoRequest { File = CreateFile("updated.jpg"), DisplayOrder = 0, IsMainPhoto = true };
 
-        service.Setup(s => s.UpdateAsync(carId, photoId, It.IsAny<Stream>(), "updated.jpg", 0, true, It.IsAny<CancellationToken>()))
+        service.Setup(s => s.UpdateAsync(It.Is<UpdateCarPhotoUploadDto>(dto => dto.CarId == carId && dto.Id == photoId && dto.FileName == "updated.jpg"), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
         var controller = new CarPhotosController(service.Object);
 
@@ -130,9 +132,9 @@ public class CarPhotosControllerTests
         Assert.Multiple(() =>
         {
             Assert.That(okResult!.StatusCode, Is.EqualTo(200));
-            Assert.That(okResult.Value, Is.EqualTo(photoId));
+            Assert.That(okResult.Value, Is.EqualTo(new IdResponse(photoId)));
         });
-        service.Verify(s => s.UpdateAsync(carId, photoId, It.IsAny<Stream>(), "updated.jpg", 0, true, It.IsAny<CancellationToken>()), Times.Once);
+        service.Verify(s => s.UpdateAsync(It.Is<UpdateCarPhotoUploadDto>(dto => dto.CarId == carId && dto.Id == photoId && dto.FileName == "updated.jpg"), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Test]
@@ -143,14 +145,14 @@ public class CarPhotosControllerTests
         var photoId = Guid.NewGuid();
         var request = new UploadCarPhotoRequest { File = CreateFile("UPDATED.PNG"), DisplayOrder = 1, IsMainPhoto = false };
 
-        service.Setup(s => s.UpdateAsync(carId, photoId, It.IsAny<Stream>(), "UPDATED.PNG", 1, false, It.IsAny<CancellationToken>()))
+        service.Setup(s => s.UpdateAsync(It.Is<UpdateCarPhotoUploadDto>(dto => dto.CarId == carId && dto.Id == photoId && dto.FileName == "UPDATED.PNG"), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
         var controller = new CarPhotosController(service.Object);
 
         var actionResult = await controller.Update(carId, photoId, request, CancellationToken.None);
 
         Assert.That(actionResult, Is.TypeOf<OkObjectResult>());
-        service.Verify(s => s.UpdateAsync(carId, photoId, It.IsAny<Stream>(), "UPDATED.PNG", 1, false, It.IsAny<CancellationToken>()), Times.Once);
+        service.Verify(s => s.UpdateAsync(It.Is<UpdateCarPhotoUploadDto>(dto => dto.CarId == carId && dto.Id == photoId && dto.FileName == "UPDATED.PNG"), It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Test]
@@ -162,7 +164,7 @@ public class CarPhotosControllerTests
         var actionResult = await controller.Update(Guid.NewGuid(), Guid.NewGuid(), new UploadCarPhotoRequest { File = null, DisplayOrder = 0, IsMainPhoto = true }, CancellationToken.None);
 
         Assert.That(actionResult, Is.TypeOf<BadRequestObjectResult>());
-        service.Verify(s => s.UpdateAsync(It.IsAny<Guid>(), It.IsAny<Guid>(), It.IsAny<Stream>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()), Times.Never);
+        service.Verify(s => s.UpdateAsync(It.IsAny<UpdateCarPhotoUploadDto>(), It.IsAny<CancellationToken>()), Times.Never);
     }
 
     [Test]

@@ -17,7 +17,7 @@ public static class BrandMapping
         /// <returns>Brand response DTO</returns>
         public BrandResponseDto ToDto() => new(brand.Id, brand.BrandName, brand.CountryId, brand.Country.CountryName, brand.LogoUrl);
     }
-    
+
     extension(CreateBrandDto dto)
     {
         /// <summary>
@@ -29,23 +29,24 @@ public static class BrandMapping
             Id = Guid.Empty,
             BrandName = dto.BrandName.Trim(),
             CountryId = dto.CountryId,
-            LogoUrl = string.IsNullOrWhiteSpace(dto.LogoUrl) ? null : dto.LogoUrl.Trim()
+            LogoUrl = null
         };
     }
-    
+
     extension(UpdateBrandDto dto)
     {
         /// <summary>
         /// Maps an update-brand request DTO to a brand entity
         /// </summary>
         /// <param name="id">Brand identifier from route</param>
+        /// <param name="logoUrl">Url of a logo</param>
         /// <returns>Brand entity with updated values</returns>
-        public Brand ToEntity(Guid id) => new()
+        public Brand ToEntity(Guid id, string? logoUrl) => new()
         {
             Id = id,
             BrandName = dto.BrandName.Trim(),
             CountryId = dto.CountryId,
-            LogoUrl = string.IsNullOrWhiteSpace(dto.LogoUrl) ? null : dto.LogoUrl.Trim()
+            LogoUrl = logoUrl
         };
     }
 }
