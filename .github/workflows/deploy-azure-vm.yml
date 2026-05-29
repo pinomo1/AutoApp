@@ -11,10 +11,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Sync files to Azure VM
-        uses: burnett01/rsync-deployments@7.0.3
+        uses: burnett01/rsync-deployments@v8
         with:
           switches: -avzr --delete --exclude='.git' --exclude='.github' --exclude='**/bin' --exclude='**/obj' --exclude='logs'
           path: ./
@@ -25,7 +25,7 @@ jobs:
           remote_port: ${{ secrets.AZURE_VM_SSH_PORT || 22 }}
 
       - name: Build and restart containers on the VM
-        uses: appleboy/ssh-action@v1.0.3
+        uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.AZURE_VM_HOST }}
           username: ${{ secrets.AZURE_VM_USER }}
