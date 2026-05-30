@@ -1,0 +1,25 @@
+﻿# Git / IDE / local tooling
+.git
+.github
+.gitignore
+.idea
+.vs
+.vscode
+*.suo
+*.user
+*.userosscache
+*.rsuser
+*.DotSettings.user
+
+# Build artifacts
+**/bin
+**/obj
+**/TestResults
+**/artifacts
+**/logs
+logs
+
+# Local/runtime files
+*.log
+*.tmp
+*.cache
